@@ -33,6 +33,12 @@ private:
 	std::ofstream LogFile;
 	bool logToFile = true;
 
+
+	status initLogFile(const std::string& logFilePath, const std::string& logFileName);
+	status shutdown();
+
+public:
+
 	enum class LogLevel {
 		LOG_LEVEL_INFO,
 		LOG_LEVEL_WARNING,
@@ -48,12 +54,6 @@ private:
 		LOG_COLOR_DEFAULT,
 	};
 
-	status initLogFile(const std::string& logFilePath, const std::string& logFileName);
-	status shutdown();
-	void log(const LogLevel& logLevel, const std::string& message);
-
-public:
-
 	LogSystem(const std::string& logFilePath, const std::string& logFileName, const bool& logToFile)
 		: logToFile(logToFile){
 		if (logToFile)
@@ -66,4 +66,5 @@ public:
 
 	void LogCustom(const std::string& customLogLevel, const std::string& message, const LogColor& logColor);
 
+	void log(const LogLevel& logLevel, const std::string& message);
 };

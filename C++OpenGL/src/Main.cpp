@@ -131,6 +131,7 @@ int main(void)
     std::cout << source.fragmentSource << std::endl;
 
 	LogSystem logSystem("logs/", "OpenGL_Log", ENABLE);
+	logSystem.log(LogSystem::LogLevel::LOG_LEVEL_INFO, "Hello Log!");
 
     unsigned int shader = CreateShader(source.vertexSource, source.fragmentSource);
     glUseProgram(shader);
