@@ -8,6 +8,27 @@
 
 #include "LogSystem.h"
 
+#define ASSERT(x) if (!(x)) __debugbreak();
+#define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+LogSystem logSystem("logs/", "OpenGL_Log_", DISABLE);
+
+static void GLClearError() {
+	while (glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const char* function, const char* file, int line) {
+	while (GLenum error = glGetError()) {
+		logSystem.log(LogSystem::LogLevel::LOG_LEVEL_FATAL,
+			"[OpenGL Error] (" + std::to_string(error) + "): " + function +
+			" " + file + ":" + std::to_string(line));
+		return false;
+	}
+	return true;
+}
+
 struct ShaderProgramSource {
     std::string vertexSource;
     std::string fragmentSource;
@@ -88,6 +109,11 @@ int main(void)
     if (!glfwInit())
         return -1;
 
+	// 使用OpenGL 3.3 核心配置文件
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "Hello OpenGL", NULL, NULL);
     if (!window)
@@ -99,42 +125,64 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    ///////////////////////////////////////////////////////////
+
+    logSystem.log(LogSystem::LogLevel::LOG_LEVEL_INFO,
+        std::string("OpenGL version: ") +
+        reinterpret_cast<const char*>(glGetString(GL_VERSION)));
+
 	/* Initialize GLEW */
 	if (glewInit() != GLEW_OK)  
-		std::cout << "Error initializing GLEW" << std::endl;
+		logSystem.log(LogSystem::LogLevel::LOG_LEVEL_ERROR, "Failed to initialize GLEW");
     else
-		std::cout << "GLEW initialized successfully" << std::endl;
+		logSystem.log(LogSystem::LogLevel::LOG_LEVEL_INFO, "GLEW initialized successfully");
     
-    // 创建顶点缓冲区
     //三角形
-
-	float positions[6] = {
-		-0.5f, -0.5f, // Bottom Left
-		 0.5f, -0.5f, // Bottom Right
-		 0.0f,  0.5f, // Top
+    float positions[] = {
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+		 0.0f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
 	};
 
-    unsigned int buffer;
-	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
+	unsigned int indexes[] = {
+		0, 1, 2,
+	};
+    //创建顶点数组
+	unsigned int vao;
+    GLCall(glGenVertexArrays(1, &vao));
+    GLCall(glBindVertexArray(vao));
 
-	glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+	// 创建顶点缓冲区对象 (VBO) 和索引缓冲区对象 (IBO)
+    unsigned int vbo;
+    GLCall(glGenBuffers(1, &vbo));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW));
+	
+	GLCall(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0));
+	GLCall(glEnableVertexAttribArray(0));
+	GLCall(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float))));
+	GLCall(glEnableVertexAttribArray(1));
+    
+    // 创建索引缓冲区
+    unsigned int ebo;
+    GLCall(glGenBuffers(1, &ebo));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
+    GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW));
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    GLCall(glBindVertexArray(0));
+    GLCall(glUseProgram(0));
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
     ShaderProgramSource source = parseShader("res/shader/Basic.shader");
-    std::cout << "VERTEX" << std::endl;
-    std::cout << source.vertexSource << std::endl;
-    std::cout << "FRAGMENT" << std::endl;
-    std::cout << source.fragmentSource << std::endl;
-
-	LogSystem logSystem("logs/", "OpenGL_Log", ENABLE);
-	logSystem.log(LogSystem::LogLevel::LOG_LEVEL_INFO, "Hello Log!");
+	logSystem.log(LogSystem::LogLevel::LOG_LEVEL_INFO, "Vertex Shader Source:\n" + source.vertexSource);
+	logSystem.log(LogSystem::LogLevel::LOG_LEVEL_INFO, "Fragment Shader Source:\n" + source.fragmentSource);
 
     unsigned int shader = CreateShader(source.vertexSource, source.fragmentSource);
-    glUseProgram(shader);
+
+	glfwSwapInterval(1); // 设置垂直同步，1表示开启垂直同步
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);  // 设置清屏颜色
+
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -142,7 +190,10 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        GLCall(glUseProgram(shader));
+        GLCall(glBindVertexArray(vao));
+
+        GLCall(glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr));
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);

@@ -71,7 +71,7 @@ void LogSystem::log(const LogLevel& logLevel, const std::string& message)
 	}
 }
 
-void LogSystem::LogCustom(const std::string& customLogLevel, const std::string& message, const LogColor& logColor)
+void LogSystem::LogCustom(const std::string& customLogLevel, const LogColor& logColor, const std::string& message)
 {
 	std::time_t rawTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::tm resultTime{};

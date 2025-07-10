@@ -64,7 +64,7 @@ public:
 		shutdown();
 	}
 
-	void LogCustom(const std::string& customLogLevel, const std::string& message, const LogColor& logColor);
+	void LogCustom(const std::string& customLogLevel, const LogColor& logColor, const std::string& message);
 
 	void log(const LogLevel& logLevel, const std::string& message);
 };
