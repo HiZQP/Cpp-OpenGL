@@ -13,10 +13,8 @@
 
 #define COLORED 1
 #define COLORLESS 0
-#define FAILED 0
-#define SUCCESS 1
-#define ENABLE 1
-#define DISABLE 0
+#define LOG_ENABLE 1
+#define LOG_DISABLE 0
 
 #define GREEN "\033[32m"
 #define YELLOW "\033[33m"
@@ -25,28 +23,17 @@
 #define BLUE "\033[34m"
 
 #define TIME std::put_time(&resultTime, "[%H:%M:%S]")
-
-using status = int;
-
-class LogSystem {
-private:
-	std::ofstream LogFile;
-	bool logToFile = true;
-
-
-	status initLogFile(const std::string& logFilePath, const std::string& logFileName);
-	status shutdown();
-
-public:
-
-	enum class LogLevel {
+#define OBJECT "[" <<logObject << "] "
+#define LOG(logLevel, message) LogSystem::getInstance().log(logLevel, message)
+	
+enum class LogLevel {
 		LOG_LEVEL_INFO,
-		LOG_LEVEL_WARNING,
+		LOG_LEVEL_WARN,
 		LOG_LEVEL_ERROR,
 		LOG_LEVEL_FATAL,
 		LOG_LEVEL_DEBUG,
 	};
-	enum class LogColor {
+enum class LogColor {
 		LOG_COLOR_GREEN,
 		LOG_COLOR_YELLOW,
 		LOG_COLOR_RED,
@@ -54,15 +41,27 @@ public:
 		LOG_COLOR_DEFAULT,
 	};
 
-	LogSystem(const std::string& logFilePath, const std::string& logFileName, const bool& logToFile)
-		: logToFile(logToFile){
-		if (logToFile)
-			initLogFile(logFilePath, logFileName);
-	}
+class LogSystem {
+private:
 
-	~LogSystem() {
-		shutdown();
-	}
+	std::ofstream LogFile;
+	std::string logObject;
+	std::string logFilePath;
+	bool logToFile = true;
+
+	LogSystem(); // 私有构造函数，禁止外部实例化
+	
+	~LogSystem();
+
+public:
+
+	static LogSystem& getInstance();
+
+	LogSystem(const LogSystem&) = delete; // 禁止拷贝构造函数
+	
+	LogSystem& operator=(const LogSystem&) = delete; // 禁止赋值操作符
+
+	void init(const std::string& logFilePath, const std::string& logObject, const bool& logToFile);
 
 	void LogCustom(const std::string& customLogLevel, const LogColor& logColor, const std::string& message);
 

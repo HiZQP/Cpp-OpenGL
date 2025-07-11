@@ -133,6 +133,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\LogSystem.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
@@ -140,6 +142,8 @@
     <None Include="res\shader\Basic.shader" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\LogSystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

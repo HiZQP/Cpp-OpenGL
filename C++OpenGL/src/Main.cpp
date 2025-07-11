@@ -1,5 +1,3 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 
 #include <iostream>
 #include <fstream>
@@ -7,112 +5,19 @@
 #include <sstream>
 
 #include "LogSystem.h"
+#include "Renderer.h"
+#include "Shader.h"
 
-#define ASSERT(x) if (!(x)) __debugbreak();
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+// 日志系统实例
 
-LogSystem logSystem("logs/", "OpenGL_Log_", DISABLE);
+Renderer OpenGLRenderer;
 
-static void GLClearError() {
-	while (glGetError() != GL_NO_ERROR);
-}
-
-static bool GLLogCall(const char* function, const char* file, int line) {
-	while (GLenum error = glGetError()) {
-		logSystem.log(LogSystem::LogLevel::LOG_LEVEL_FATAL,
-			"[OpenGL Error] (" + std::to_string(error) + "): " + function +
-			" " + file + ":" + std::to_string(line));
-		return false;
-	}
-	return true;
-}
-
-struct ShaderProgramSource {
-    std::string vertexSource;
-    std::string fragmentSource;
-};
-
-static ShaderProgramSource parseShader(const std::string& filePath) {
-
-    std::ifstream stream(filePath);
-
-    enum class ShaderType {
-        NONE = -1,
-        VERTEX,
-        FRAGMENT
-    };
-
-    ShaderType type = ShaderType::NONE;
-    std::string line;
-    std::stringstream ss[2];
-    while (std::getline(stream, line)) {
-        if (line.find("#shader") != std::string::npos) {
-            if (line.find("vertex") != std::string::npos)
-                type = ShaderType::VERTEX;
-            else if (line.find("fragment") != std::string::npos)
-                type = ShaderType::FRAGMENT;
-        }
-        else {
-            ss[(int)type] << line << '\n';
-        }
-    }
-
-    return { ss[0].str(), ss[1].str() };
-}
-
-static unsigned int compileShader(unsigned int type, const std::string& source) {
-    unsigned int id = glCreateShader(type);
-    const char* src = source.c_str();
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
-    
-    // 错误处理
-    int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-    if (result == GL_FALSE) {
-        int length;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-        char* message = (char*)alloca(length * sizeof(char));
-        glGetShaderInfoLog(id, length, &length, message);
-        std::cout << "Failed compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!" << std::endl;
-        std::cout << message << std::endl;
-        glDeleteShader(id);
-        return 0;
-    }
-
-    return id;
-}
-
-static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
-    unsigned int program = glCreateProgram();
-    unsigned int vs = compileShader(GL_VERTEX_SHADER, vertexShader);
-    unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragmentShader);
-        
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-    glValidateProgram(program);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    return program;
-}
 
 int main(void)
 {
+    LogSystem::getInstance().init("logs/", "OpenGL", true);
+
     GLFWwindow* window;
-
-    /* Initialize the library */
-    if (!glfwInit())
-        return -1;
-
-	// 使用OpenGL 3.3 核心配置文件
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "Hello OpenGL", NULL, NULL);
@@ -126,19 +31,10 @@ int main(void)
     glfwMakeContextCurrent(window);
 
     ///////////////////////////////////////////////////////////
-
-    logSystem.log(LogSystem::LogLevel::LOG_LEVEL_INFO,
-        std::string("OpenGL version: ") +
-        reinterpret_cast<const char*>(glGetString(GL_VERSION)));
-
-	/* Initialize GLEW */
-	if (glewInit() != GLEW_OK)  
-		logSystem.log(LogSystem::LogLevel::LOG_LEVEL_ERROR, "Failed to initialize GLEW");
-    else
-		logSystem.log(LogSystem::LogLevel::LOG_LEVEL_INFO, "GLEW initialized successfully");
     
     //三角形
     float positions[] = {
+		// 顶点位置          // 颜色
         -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
 		 0.0f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
 		 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,

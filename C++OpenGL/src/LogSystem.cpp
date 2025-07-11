@@ -1,27 +1,39 @@
 #include "LogSystem.h"
 
-status LogSystem::initLogFile(const std::string& logFilePath, const std::string& logFileName)
+LogSystem::LogSystem() {
+
+}
+
+LogSystem::~LogSystem()
 {
+	if (LogFile.is_open()) {
+		log(LogLevel::LOG_LEVEL_INFO, "Log file closed: " + logFilePath + logObject);
+		LogFile.close();
+	}
+}
+
+LogSystem& LogSystem::getInstance()
+{
+	// 使用单例模式，确保只有一个 LogSystem 实例
+	static LogSystem instance;
+	return instance;
+}
+
+void LogSystem::init(const std::string& logFilePath, const std::string& logObject, const bool& logToFile)
+{
+	this->logToFile = logToFile;
+	this->logFilePath = logFilePath;
+	this->logObject = logObject;
 	std::string logTime = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
-	std::string logname = logFileName + "_" + logTime;
+	std::string logname = logObject + "_" + logTime;
 
 	LogFile.open(logFilePath + logname + ".log");
 
 	if (!LogFile.is_open()) {
 		log(LogLevel::LOG_LEVEL_FATAL, "Failed to create log file: " + logFilePath + logname + ".log");
-		return FAILED;
 	}
 
 	log(LogLevel::LOG_LEVEL_INFO, "Log file created: " + logFilePath + logname + ".log");
-	return SUCCESS;
-}
-
-status LogSystem::shutdown()
-{
-	if (LogFile.is_open()) {
-		LogFile.close();
-	}
-	return SUCCESS;
 }
 
 void LogSystem::log(const LogLevel& logLevel, const std::string& message)
@@ -32,19 +44,19 @@ void LogSystem::log(const LogLevel& logLevel, const std::string& message)
 	if (logToFile && LogFile.is_open()) {
 		switch (logLevel) {
 		case LogLevel::LOG_LEVEL_INFO:
-			LogFile << TIME << "[INFO] " << message << std::endl;
+			LogFile << TIME << "[INFO] " << OBJECT << message << std::endl;
 			break;
-		case LogLevel::LOG_LEVEL_WARNING:
-			LogFile << TIME << "[WARNING] " << message << std::endl;
+		case LogLevel::LOG_LEVEL_WARN:
+			LogFile << TIME << "[WARNING] " << OBJECT << message << std::endl;
 			break;
 		case LogLevel::LOG_LEVEL_ERROR:
-			LogFile << TIME << "[ERROR] " << message << std::endl;
+			LogFile << TIME << "[ERROR] " << OBJECT << message << std::endl;
 			break;
 		case LogLevel::LOG_LEVEL_FATAL:
-			LogFile << TIME << "[FATAL] " << message << std::endl;
+			LogFile << TIME << "[FATAL] " << OBJECT << message << std::endl;
 			break;
 		case LogLevel::LOG_LEVEL_DEBUG:
-			LogFile << TIME << "[DEBUG] " << message << std::endl;
+			LogFile << TIME << "[DEBUG] " << OBJECT << message << std::endl;
 			break;
 		default:
 			break;
@@ -52,19 +64,19 @@ void LogSystem::log(const LogLevel& logLevel, const std::string& message)
 	}
 	switch (logLevel) {
 	case LogLevel::LOG_LEVEL_INFO:
-		std::cout << TIME << DEFAULT << "[INFO] " << message << std::endl;
+		std::cout << TIME << DEFAULT << "[INFO] " << OBJECT << message << std::endl;
 		break;
-	case LogLevel::LOG_LEVEL_WARNING:
-		std::cout << TIME << YELLOW << "[WARNING] " << message << DEFAULT << std::endl;
+	case LogLevel::LOG_LEVEL_WARN:
+		std::cout << TIME << YELLOW << "[WARNING] " << OBJECT << message << DEFAULT << std::endl;
 		break;
 	case LogLevel::LOG_LEVEL_ERROR:
-		std::cout << TIME << RED << "[ERROR] " << message << DEFAULT << std::endl;
+		std::cout << TIME << RED << "[ERROR] " << OBJECT << message << DEFAULT << std::endl;
 		break;
 	case LogLevel::LOG_LEVEL_FATAL:
-		std::cout << TIME << RED << "[FATAL] " << message << DEFAULT << std::endl;
+		std::cout << TIME << RED << "[FATAL] " << OBJECT << message << DEFAULT << std::endl;
 		break;
 	case LogLevel::LOG_LEVEL_DEBUG:
-		std::cout << TIME << BLUE << "[DEBUG] " << message << DEFAULT << std::endl;
+		std::cout << TIME << BLUE << "[DEBUG] " << OBJECT << message << DEFAULT << std::endl;
 		break;
 	default:
 		break;
