@@ -13,8 +13,8 @@
 
 #define COLORED 1
 #define COLORLESS 0
-#define LOG_ENABLE 1
-#define LOG_DISABLE 0
+#define LOG_ENABLE true
+#define LOG_DISABLE false
 
 #define GREEN "\033[32m"
 #define YELLOW "\033[33m"
@@ -23,7 +23,6 @@
 #define BLUE "\033[34m"
 
 #define TIME std::put_time(&resultTime, "[%H:%M:%S]")
-#define OBJECT "[" <<logObject << "] "
 #define LOG(logLevel, message) LogSystem::getInstance().log(logLevel, message)
 	
 enum class LogLevel {
@@ -44,10 +43,10 @@ enum class LogColor {
 class LogSystem {
 private:
 
-	std::ofstream LogFile;
-	std::string logObject;
-	std::string logFilePath;
-	bool logToFile = true;
+	std::ofstream m_LogFile;
+	std::string m_logObject;
+	std::string m_logFilePath;
+	bool m_logToFile = true;
 
 	LogSystem(); // 私有构造函数，禁止外部实例化
 	

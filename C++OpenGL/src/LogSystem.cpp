@@ -6,9 +6,9 @@ LogSystem::LogSystem() {
 
 LogSystem::~LogSystem()
 {
-	if (LogFile.is_open()) {
-		log(LogLevel::LOG_LEVEL_INFO, "Log file closed: " + logFilePath + logObject);
-		LogFile.close();
+	if (m_LogFile.is_open()) {
+		log(LogLevel::LOG_LEVEL_INFO, "Log file closed: " + m_logFilePath + m_logObject);
+		m_LogFile.close();
 	}
 }
 
@@ -21,19 +21,21 @@ LogSystem& LogSystem::getInstance()
 
 void LogSystem::init(const std::string& logFilePath, const std::string& logObject, const bool& logToFile)
 {
-	this->logToFile = logToFile;
-	this->logFilePath = logFilePath;
-	this->logObject = logObject;
+	m_logToFile = logToFile;
+	m_logFilePath = logFilePath;
+	m_logObject = logObject;
 	std::string logTime = std::to_string(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
 	std::string logname = logObject + "_" + logTime;
 
-	LogFile.open(logFilePath + logname + ".log");
-
-	if (!LogFile.is_open()) {
-		log(LogLevel::LOG_LEVEL_FATAL, "Failed to create log file: " + logFilePath + logname + ".log");
+	if (m_logToFile == LOG_ENABLE) {
+		m_LogFile.open(logFilePath + logname + ".log");
+		if (m_LogFile.is_open()) {
+			log(LogLevel::LOG_LEVEL_INFO, "Log file created: " + logFilePath + logname + ".log");
+		}
+		else {
+			log(LogLevel::LOG_LEVEL_FATAL, "Failed to create log file: " + logFilePath + logname + ".log");
+		}
 	}
-
-	log(LogLevel::LOG_LEVEL_INFO, "Log file created: " + logFilePath + logname + ".log");
 }
 
 void LogSystem::log(const LogLevel& logLevel, const std::string& message)
@@ -41,22 +43,22 @@ void LogSystem::log(const LogLevel& logLevel, const std::string& message)
 	std::time_t rawTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::tm resultTime{};
     localtime_s(&resultTime, &rawTime);
-	if (logToFile && LogFile.is_open()) {
+	if (m_logToFile && m_LogFile.is_open()) {
 		switch (logLevel) {
 		case LogLevel::LOG_LEVEL_INFO:
-			LogFile << TIME << "[INFO] " << OBJECT << message << std::endl;
+			m_LogFile << TIME << "[INFO] " << message << std::endl;
 			break;
 		case LogLevel::LOG_LEVEL_WARN:
-			LogFile << TIME << "[WARNING] " << OBJECT << message << std::endl;
+			m_LogFile << TIME << "[WARNING] " << message << std::endl;
 			break;
 		case LogLevel::LOG_LEVEL_ERROR:
-			LogFile << TIME << "[ERROR] " << OBJECT << message << std::endl;
+			m_LogFile << TIME << "[ERROR] " << message << std::endl;
 			break;
 		case LogLevel::LOG_LEVEL_FATAL:
-			LogFile << TIME << "[FATAL] " << OBJECT << message << std::endl;
+			m_LogFile << TIME << "[FATAL] " << message << std::endl;
 			break;
 		case LogLevel::LOG_LEVEL_DEBUG:
-			LogFile << TIME << "[DEBUG] " << OBJECT << message << std::endl;
+			m_LogFile << TIME << "[DEBUG] " << message << std::endl;
 			break;
 		default:
 			break;
@@ -64,19 +66,19 @@ void LogSystem::log(const LogLevel& logLevel, const std::string& message)
 	}
 	switch (logLevel) {
 	case LogLevel::LOG_LEVEL_INFO:
-		std::cout << TIME << DEFAULT << "[INFO] " << OBJECT << message << std::endl;
+		std::cout << TIME << DEFAULT << "[INFO] " << message << std::endl;
 		break;
 	case LogLevel::LOG_LEVEL_WARN:
-		std::cout << TIME << YELLOW << "[WARNING] " << OBJECT << message << DEFAULT << std::endl;
+		std::cout << TIME << YELLOW << "[WARNING] " << message << DEFAULT << std::endl;
 		break;
 	case LogLevel::LOG_LEVEL_ERROR:
-		std::cout << TIME << RED << "[ERROR] " << OBJECT << message << DEFAULT << std::endl;
+		std::cout << TIME << RED << "[ERROR] " << message << DEFAULT << std::endl;
 		break;
 	case LogLevel::LOG_LEVEL_FATAL:
-		std::cout << TIME << RED << "[FATAL] " << OBJECT << message << DEFAULT << std::endl;
+		std::cout << TIME << RED << "[FATAL] " << message << DEFAULT << std::endl;
 		break;
 	case LogLevel::LOG_LEVEL_DEBUG:
-		std::cout << TIME << BLUE << "[DEBUG] " << OBJECT << message << DEFAULT << std::endl;
+		std::cout << TIME << BLUE << "[DEBUG] " << message << DEFAULT << std::endl;
 		break;
 	default:
 		break;
@@ -88,8 +90,8 @@ void LogSystem::LogCustom(const std::string& customLogLevel, const LogColor& log
 	std::time_t rawTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::tm resultTime{};
 	localtime_s(&resultTime, &rawTime);
-	if (logToFile && LogFile.is_open()) {
-		LogFile << TIME << "[" << customLogLevel << "] " << message << std::endl;
+	if (m_logToFile && m_LogFile.is_open()) {
+		m_LogFile << TIME << "[" << customLogLevel << "] " << message << std::endl;
 	}
 	switch (logColor) {
 	case LogColor::LOG_COLOR_GREEN:

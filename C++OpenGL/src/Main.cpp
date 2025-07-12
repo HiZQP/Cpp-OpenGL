@@ -8,16 +8,26 @@
 #include "Renderer.h"
 #include "Shader.h"
 
-// 日志系统实例
-
-Renderer OpenGLRenderer;
-
-
 int main(void)
 {
-    LogSystem::getInstance().init("logs/", "OpenGL", true);
+    LogSystem::getInstance().init("logs/", "OpenGL", LOG_DISABLE);
 
     GLFWwindow* window;
+
+    // 初始化GLFW库
+    if (!glfwInit())
+    {
+        LOG(LogLevel::LOG_LEVEL_FATAL, "Failed to initialize GLFW");
+        return -1;
+	}
+	else {
+		LOG(LogLevel::LOG_LEVEL_INFO, "GLFW initialized successfully");
+	}
+
+    // 使用OpenGL 3.3 核心配置文件
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "Hello OpenGL", NULL, NULL);
@@ -30,8 +40,17 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    LOG(LogLevel::LOG_LEVEL_INFO, "OpenGL Version: " + std::string((const char*)glGetString(GL_VERSION)));
+
+	// 初始化GLEW
+    if (glewInit() != GLEW_OK)
+        LOG(LogLevel::LOG_LEVEL_FATAL, "Failed to initialize GLEW");
+    else
+        LOG(LogLevel::LOG_LEVEL_INFO, "GLEW initialized successfully");
+
     ///////////////////////////////////////////////////////////
     
+
     //三角形
     float positions[] = {
 		// 顶点位置          // 颜色
@@ -66,15 +85,11 @@ int main(void)
     GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes), indexes, GL_STATIC_DRAW));
 
     GLCall(glBindVertexArray(0));
-    GLCall(glUseProgram(0));
     GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
     GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
-    ShaderProgramSource source = parseShader("res/shader/Basic.shader");
-	logSystem.log(LogSystem::LogLevel::LOG_LEVEL_INFO, "Vertex Shader Source:\n" + source.vertexSource);
-	logSystem.log(LogSystem::LogLevel::LOG_LEVEL_INFO, "Fragment Shader Source:\n" + source.fragmentSource);
-
-    unsigned int shader = CreateShader(source.vertexSource, source.fragmentSource);
+    Shader GLshader("res/shader/Basic.shader");
+    GLshader.bind();
 
 	glfwSwapInterval(1); // 设置垂直同步，1表示开启垂直同步
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);  // 设置清屏颜色
@@ -86,7 +101,6 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        GLCall(glUseProgram(shader));
         GLCall(glBindVertexArray(vao));
 
         GLCall(glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr));
@@ -98,7 +112,7 @@ int main(void)
         glfwPollEvents();
     }
 
-    glDeleteShader(shader);
+	GLshader.unbind();
 
     glfwTerminate();
     return 0;

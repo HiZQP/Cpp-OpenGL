@@ -3,13 +3,32 @@
 Shader::Shader(const std::string& filePath)
 {
 	m_FilePath = filePath;
-	ShaderProgramSource source = parseShader(filePath);
+	ShaderProgramSource source = parseShader(m_FilePath);
 	m_programeID = CreateShader(source.vertexSource, source.fragmentSource);
+	if (m_programeID == 0) {
+		LOG(LogLevel::LOG_LEVEL_FATAL, "Failed to create shader program from file: " + m_FilePath);
+		return;
+	}
+	LOG(LogLevel::LOG_LEVEL_INFO, "Shader program created successfully from file: " + m_FilePath);
+    LOG(LogLevel::LOG_LEVEL_INFO, "Vertex Shader Source : \n" + source.vertexSource);
+	LOG(LogLevel::LOG_LEVEL_INFO, "Fragment Shader Source : \n" + source.fragmentSource);
 }
 
 Shader::~Shader()
 {
 	glDeleteProgram(m_programeID);
+}
+
+void Shader::bind() const
+{
+	glUseProgram(m_programeID);
+	LOG(LogLevel::LOG_LEVEL_INFO, "Shader '" + m_FilePath + "' bound successfully.");   
+}
+
+void Shader::unbind() const
+{
+	glUseProgram(0);
+	LOG(LogLevel::LOG_LEVEL_INFO, "Shader '" + m_FilePath + "' unbound successfully.");
 }
 
 Shader::ShaderProgramSource Shader::parseShader(const std::string& filePath) {
