@@ -6,7 +6,7 @@ Shader::Shader(const std::string& filePath)
 	ShaderProgramSource source = parseShader(m_FilePath);
 	m_programeID = CreateShader(source.vertexSource, source.fragmentSource);
 	if (m_programeID == 0) {
-		LOG(LogLevel::LOG_LEVEL_FATAL, "Failed to create shader program from file: " + m_FilePath);
+		LOG(LogLevel::LOG_LEVEL_ERROR, "Failed to create shader program from file: " + m_FilePath);
 		return;
 	}
 	LOG(LogLevel::LOG_LEVEL_INFO, "Shader program created successfully from file: " + m_FilePath);
@@ -61,9 +61,18 @@ Shader::ShaderProgramSource Shader::parseShader(const std::string& filePath) {
 
 void Shader::setUniform1i(const std::string& name, int value)
 {
-
+	GLCall(glUniform1i(getUniformLocation(name), value));
 }
 
+void Shader::setUniform1f(const std::string& name, float value)
+{
+	GLCall(glUniform1f(getUniformLocation(name), value));
+}
+
+void Shader::setUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
+{
+    GLCall(glUniform4f(getUniformLocation(name), v0, v1, v2, v3));
+}
  unsigned int Shader::compileShader(unsigned int type, const std::string& source) {
     unsigned int id = glCreateShader(type);
     const char* src = source.c_str();

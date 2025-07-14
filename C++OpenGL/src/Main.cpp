@@ -65,10 +65,10 @@ int main(void)
             0, 1, 2,
         };
         /*
-		VertexArray是一个顶点数组对象（VAO），它用于存储顶点缓冲区对象（VBO）和索引缓冲区对象（IBO）的状态。
-		VertexBuffer是一个顶点缓冲区对象（VBO），它用于存储顶点数据， 但是不解释顶点数据的布局和含义。
-		IndexBuffer是一个索引缓冲区对象（IBO），它用于存储索引数据，允许我们重用顶点数据来绘制图形。
-		VertexBufferLayout是一个顶点缓冲区布局，它定义了顶点数据的格式和布局，向OpenGL解释如何处理顶点数据。
+		VertexArray是顶点数组对象（VAO），用于存储顶点缓冲区对象（VBO）和索引缓冲区对象（IBO）的状态。
+		VertexBuffer是顶点缓冲区对象（VBO），用于存储顶点数据， 但是不解释顶点数据的布局和含义。
+		IndexBuffer是索引缓冲区对象（IBO），用于存储索引数据，允许我们重用顶点数据来绘制图形。
+		VertexBufferLayout是一个顶点缓冲区布局，定义了顶点数据的格式和布局，向OpenGL解释如何处理顶点数据。
         
 		一个（VAO）可以绑定多个（VBO）和（IBO），每个（VBO）可以有自己的布局（VertexBufferLayout）。
         */
