@@ -10,6 +10,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
+#include "Texture.h"
 
 int main(void)
 {
@@ -54,15 +55,17 @@ int main(void)
     {///////////////////////////////////////////////////////////
         // 顶点数据
         float vertexs[] = {
-            // 顶点位置          // 颜色
-            -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-             0.0f,  0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-             0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+            // 顶点位置      // 纹理坐标    
+			-0.5f, -0.5f,  0.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.0f,  1.0f,  1.0f,
+			-0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
         };
 
 		// 索引数据
         unsigned int indexes[] = {
-            0, 1, 2,
+		    0, 1, 2,
+            2, 3, 0
         };
         /*
 		VertexArray是顶点数组对象（VAO），用于存储顶点缓冲区对象（VBO）和索引缓冲区对象（IBO）的状态。
@@ -81,7 +84,7 @@ int main(void)
         // 创建顶点缓冲区布局
 		VertexBufferLayout layout;
 		layout.push<float>(3); // 顶点位置
-		layout.push<float>(3); // 颜色
+		layout.push<float>(2); // 纹理坐标
 
 		// 创建顶点数组对象 (VAO)
 		VertexArray va;
@@ -91,8 +94,12 @@ int main(void)
         GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
         GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
-        Shader GLshader("res/shader/Basic.shader");
+        Shader GLshader("res/shaders/Basic.shader");
         GLshader.bind();
+
+		Texture texture("res/textures/OpenGL.png");
+		texture.bind(0);
+		GLshader.setUniform1i("u_Texture", 0); // 设置纹理单元
 
         glfwSwapInterval(1); // 设置垂直同步，1表示开启垂直同步
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);  // 设置清屏颜色
@@ -106,7 +113,7 @@ int main(void)
 
             glClear(GL_COLOR_BUFFER_BIT);
 
-            GLCall(glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr));
+            GLCall(glDrawElements(GL_TRIANGLES, ib.getCount(), GL_UNSIGNED_INT, nullptr));
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);

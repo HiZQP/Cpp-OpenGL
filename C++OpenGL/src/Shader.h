@@ -16,7 +16,7 @@ private:
     };
 	unsigned int m_programeID;
 	std::string m_FilePath;
-	std::unordered_map<std::string, GLint> m_UniformLocationCache;
+	std::unordered_map<std::string, int> m_UniformLocationCache;
 
 public:
 
@@ -46,6 +46,6 @@ private:
 
     unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
 
-	GLint getUniformLocation(const std::string& name);
+	int getUniformLocation(const std::string& name);
 };
 
