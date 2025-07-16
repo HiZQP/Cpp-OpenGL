@@ -74,6 +74,11 @@ void Shader::setUniform4f(const std::string& name, float v0, float v1, float v2,
     GLCall(glUniform4f(getUniformLocation(name), v0, v1, v2, v3));
 }
 
+void Shader::setUniformMat4f(const std::string& name, const glm::mat4& matrix)
+{
+    GLCall(glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, &matrix[0][0]));
+}
+
 unsigned int Shader::compileShader(unsigned int type, const std::string& source) {
     unsigned int id = glCreateShader(type);
     const char* src = source.c_str();
@@ -89,8 +94,11 @@ unsigned int Shader::compileShader(unsigned int type, const std::string& source)
         char* message = (char*)alloca(length * sizeof(char));
         glGetShaderInfoLog(id, length, &length, message);
 		//  ‰≥ˆ¥ÌŒÛ–≈œ¢
-        std::cout << "Failed compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!" << std::endl;
-        std::cout << message << std::endl;
+        if(type == GL_VERTEX_SHADER) {
+            LOG(LogLevel::LOG_LEVEL_ERROR, "Vertex shader compilation failed: " + std::string(message));
+        } else if(type == GL_FRAGMENT_SHADER) {
+            LOG(LogLevel::LOG_LEVEL_ERROR, "Fragment shader compilation failed: " + std::string(message));
+		}
         glDeleteShader(id);
         return 0;
     }

@@ -4,6 +4,13 @@
 #include <string>
 #include <sstream>
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
 #include "LogSystem.h"
 #include "Renderer.h"
 #include "Shader.h"
@@ -34,7 +41,7 @@ int main(void)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello OpenGL", NULL, NULL);
+    window = glfwCreateWindow(960, 540, "Hello OpenGL", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -56,10 +63,10 @@ int main(void)
         // 顶点数据
         float vertexs[] = {
             // 顶点位置      // 纹理坐标    
-			-0.5f, -0.5f,  0.0f,  0.0f,  0.0f,
-			 0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-			 0.5f,  0.5f,  0.0f,  1.0f,  1.0f,
-			-0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			0.0f, 0.0f,  0.0f,  0.0f,  0.0f,
+			520.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+			520.0f,  235.0f,  0.0f,  1.0f,  1.0f,
+			0.0f,  235.0f,  0.0f,  0.0f,  1.0f,
         };
 
 		// 索引数据
@@ -69,8 +76,8 @@ int main(void)
         };
         /*
 		VertexArray是顶点数组对象（VAO），用于存储顶点缓冲区对象（VBO）和索引缓冲区对象（IBO）的状态。
-		VertexBuffer是顶点缓冲区对象（VBO），用于存储顶点数据， 但是不解释顶点数据的布局和含义。
-		IndexBuffer是索引缓冲区对象（IBO），用于存储索引数据，允许我们重用顶点数据来绘制图形。
+		VertexBuffer是顶点缓冲区对象（VBO），用于存储顶点数据并发送至VRAM， 但是不解释顶点数据的布局和含义。
+		IndexBuffer是索引缓冲区对象（IBO），用于存储索引数据，允许我们重用顶点数据来绘制图形，减少VRAM的使用。
 		VertexBufferLayout是一个顶点缓冲区布局，定义了顶点数据的格式和布局，向OpenGL解释如何处理顶点数据。
         
 		一个（VAO）可以绑定多个（VBO）和（IBO），每个（VBO）可以有自己的布局（VertexBufferLayout）。
@@ -90,40 +97,82 @@ int main(void)
 		VertexArray va;
 		va.addBuffer(vb, layout);
 
-        GLCall(glBindVertexArray(0));
-        GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
-        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-
         Shader GLshader("res/shaders/Basic.shader");
         GLshader.bind();
+
+		glm::mat4 projection = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
+        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+		//glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
+		// 计算模型(model)视图(view)投影(projection)矩阵，也就是MVP矩阵，在OpenGL中实际计算顺序是P * V * M
+        //glm::mat4 mvp = projection * view * model;
+        
+		GLCall(glEnable(GL_BLEND)); // 开启混合
+		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)); // 设置混合函数
 
 		Texture texture("res/textures/OpenGL.png");
 		texture.bind(0);
 		GLshader.setUniform1i("u_Texture", 0); // 设置纹理单元
+		// ImGui 初始化
+        ///////////////////////////////////////////////////////
+        ImGui::CreateContext();
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init();
+        ImGui::StyleColorsDark();
+
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        bool show_demo_window = true;
+        bool show_another_window = false;
+        ///////////////////////////////////////////////////////
 
         glfwSwapInterval(1); // 设置垂直同步，1表示开启垂直同步
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);  // 设置清屏颜色
+
+        glm::vec3 translation(0, 0, 0);
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
             /* 在这里渲染 */
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), translation );
+            glm::mat4 mvp = projection * view * model;
+
 			va.bind();
 			ib.bind();
+
+            GLshader.setUniformMat4f("u_MVP", mvp);
 
             glClear(GL_COLOR_BUFFER_BIT);
 
             GLCall(glDrawElements(GL_TRIANGLES, ib.getCount(), GL_UNSIGNED_INT, nullptr));
+			// ImGui 渲染
+            ///////////////////////////////////////////////////////
+            {
+                ImGui::Begin("Hello, world!");
+				ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f);
+                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+                ImGui::End();
+            }
 
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            ///////////////////////////////////////////////////////
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
 
             /* Poll for and process events */
             glfwPollEvents();
         }
-
         GLshader.unbind();
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     glfwTerminate();
     return 0;
 }

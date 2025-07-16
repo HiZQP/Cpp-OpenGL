@@ -17,7 +17,8 @@ struct VertexBufferElement
 			case GL_UNSIGNED_INT:   return sizeof(unsigned int);
 			case GL_UNSIGNED_BYTE:  return sizeof(unsigned char);
 		}
-		ASSERT(false, "Unknown type!");
+		LOG(LogLevel::LOG_LEVEL_ERROR, "Unknown type in VertexBufferElement::getSizeOfType");
+		ASSERT(false);
 		return 0;
 	}
 };	
