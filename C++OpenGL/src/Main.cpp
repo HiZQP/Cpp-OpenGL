@@ -15,6 +15,7 @@
 #include "Renderer.h"
 #include "Shader.h"
 #include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Texture.h"
@@ -63,10 +64,10 @@ int main(void)
         // 顶点数据
         float vertexs[] = {
             // 顶点位置      // 纹理坐标    
-			0.0f, 0.0f,  0.0f,  0.0f,  0.0f,
-			520.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+			  0.0f,    0.0f,  0.0f,  0.0f,  0.0f,
+			520.0f,    0.0f,  0.0f,  1.0f,  0.0f,
 			520.0f,  235.0f,  0.0f,  1.0f,  1.0f,
-			0.0f,  235.0f,  0.0f,  0.0f,  1.0f,
+			  0.0f,  235.0f,  0.0f,  0.0f,  1.0f,
         };
 
 		// 索引数据
@@ -94,7 +95,7 @@ int main(void)
 		layout.push<float>(2); // 纹理坐标
 
 		// 创建顶点数组对象 (VAO)
-		VertexArray va;
+		VertexArray va;                                      
 		va.addBuffer(vb, layout);
 
         Shader GLshader("res/shaders/Basic.shader");
@@ -129,6 +130,12 @@ int main(void)
 
         glm::vec3 translation(0, 0, 0);
 
+		va.unbind();
+		vb.unbind();
+		ib.unbind();
+
+		Renderer renderer;
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
@@ -137,17 +144,17 @@ int main(void)
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
+			renderer.clear();
+
             glm::mat4 model = glm::translate(glm::mat4(1.0f), translation );
             glm::mat4 mvp = projection * view * model;
-
-			va.bind();
-			ib.bind();
 
             GLshader.setUniformMat4f("u_MVP", mvp);
 
             glClear(GL_COLOR_BUFFER_BIT);
 
-            GLCall(glDrawElements(GL_TRIANGLES, ib.getCount(), GL_UNSIGNED_INT, nullptr));
+			renderer.draw(va, ib, GLshader);
+            
 			// ImGui 渲染
             ///////////////////////////////////////////////////////
             {

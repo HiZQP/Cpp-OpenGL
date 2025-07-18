@@ -1,4 +1,5 @@
 #include "Shader.h"
+#include "Renderer.h"
 
 Shader::Shader(const std::string& filePath)
 {
@@ -22,7 +23,8 @@ Shader::~Shader()
 void Shader::bind() const
 {
 	glUseProgram(m_programeID);
-	LOG(LogLevel::LOG_LEVEL_INFO, "Shader '" + m_FilePath + "' bound successfully.");   
+	// 暂时禁言，每帧都在狗叫有点烦
+	//LOG(LogLevel::LOG_LEVEL_INFO, "Shader '" + m_FilePath + "' bound successfully.");   
 }
 
 void Shader::unbind() const

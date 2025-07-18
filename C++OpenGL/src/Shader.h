@@ -6,7 +6,6 @@
 
 #include "glm/glm.hpp"
 
-#include "Renderer.h"
 #include "LogSystem.h"
 
 class Shader
