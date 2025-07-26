@@ -8,6 +8,8 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw.h"
@@ -21,6 +23,8 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Texture.h"
+#include "Input.h"
+#include "Camera.h"
 
 int main(void)
 {
@@ -103,12 +107,6 @@ int main(void)
         Shader GLshader("res/shaders/Basic.shader");
         GLshader.bind();
 
-		glm::mat4 projection = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
-        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-		//glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
-		// 计算模型(model)视图(view)投影(projection)矩阵，也就是MVP矩阵，在OpenGL中实际计算顺序是P * V * M
-        //glm::mat4 mvp = projection * view * model;
-        
 		GLCall(glEnable(GL_BLEND)); // 开启混合
 		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)); // 设置混合函数
 
@@ -127,16 +125,18 @@ int main(void)
         bool show_another_window = false;
         ///////////////////////////////////////////////////////
 
-        glfwSwapInterval(1); // 设置垂直同步，1表示开启垂直同步
+        glfwSwapInterval(0); // 设置垂直同步，1表示开启垂直同步
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);  // 设置清屏颜色
 
-        glm::vec3 translation(0, 0, 0);
 
 		va.unbind();
 		vb.unbind();
 		ib.unbind();
 
 		Renderer renderer;
+        Input input(window);
+		Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(45.0f, 0.0f, 0.0f), 960.0f / 540.0f, 60.0f, 0.1f, 100.0f);
+        float scale = 0.1f;
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
@@ -148,8 +148,38 @@ int main(void)
 
 			renderer.clear();
 
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), translation );
-            glm::mat4 mvp = projection * view * model;
+			// 处理输入
+            if(input.isKeyPressed(GLFW_KEY_ESCAPE)) {
+                glfwSetWindowShouldClose(window, true);
+			}
+            if(input.isKeyPressed(GLFW_KEY_W)) {
+                camera.move(glm::vec3(0.0f, 0.0f, -1.0f));
+			}
+            if(input.isKeyPressed(GLFW_KEY_S)) {
+				camera.move(glm::vec3(0.0f, 0.0f, 1.0f));
+			}
+			if (input.isKeyPressed(GLFW_KEY_A)) {
+				camera.move(glm::vec3(-1.0f, 0.0f, 0.0f));
+			}
+			if (input.isKeyPressed(GLFW_KEY_D)) {
+				camera.move(glm::vec3(1.0f, 0.0f, 0.0f));
+			}
+			if (input.isKeyPressed(GLFW_KEY_Q)) {
+				camera.move(glm::vec3(0.0f, -1.0f, 0.0f));
+			}
+			if (input.isKeyPressed(GLFW_KEY_E)) {
+				camera.move(glm::vec3(0.0f, 1.0f, 0.0f));
+			}
+            if (input.isKeyPressed(GLFW_KEY_J)) {
+                camera.rotate(glm::vec3(0.0f, 1.0f, 0.0f));
+            }
+			// 鼠标加速度控制相机旋转
+			glm::vec3 mouseAccel = input.getMouseAcceleration();
+			camera.rotate(glm::vec3(mouseAccel.y, mouseAccel.x, 0.0f)); // 鼠标加速度控制相机旋转
+
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::scale(model, glm::vec3(scale));
+            glm::mat4 mvp = camera.getProjectionMatrix() * camera.getViewMatrix() * model;
 
             GLshader.setUniformMat4f("u_MVP", mvp);
 
@@ -160,8 +190,13 @@ int main(void)
 			// ImGui 渲染
             ///////////////////////////////////////////////////////
             {
-                ImGui::Begin("Hello, world!");
-				ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f);
+                ImGui::Begin("OpenGL_Test");
+				ImGui::SliderFloat("Translation", &scale, 0.0f, 1.0f);
+				// 显示鼠标位置
+				ImGui::Text("MouseX: %f MouseY: %f", input.getMousePosition().x, input.getMousePosition().y);
+                // 显示鼠标加速度
+				ImGui::Text("Mouse Acceleration: X: %.3f Y: %.3f Z: %.3f", mouseAccel.x, mouseAccel.y, mouseAccel.z);
+
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
                 ImGui::End();
             }
