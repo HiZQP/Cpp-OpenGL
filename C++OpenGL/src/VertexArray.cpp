@@ -7,7 +7,7 @@ VertexArray::VertexArray()
 	GLCall(glGenVertexArrays(1, &m_RendererID));
 }
 
-VertexArray::~VertexArray()
+void VertexArray::deleteIt() const
 {
 	GLCall(glDeleteVertexArrays(1, &m_RendererID));
 }

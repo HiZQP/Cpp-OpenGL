@@ -8,12 +8,13 @@ private:
 public:
 	IndexBuffer(const void* data, unsigned int size);
 
-	~IndexBuffer();
+	void deleteIt() const;
 
 	void bind() const;
 
 	void unbind() const;
 
 	inline unsigned int getCount() const { return m_Count; }
+	inline unsigned int getRendererID() const { return m_RendererID; }
 };
 

@@ -46,19 +46,19 @@ void LogSystem::log(const LogLevel& logLevel, const std::string& message)
 	if (m_logToFile && m_LogFile.is_open()) {
 		switch (logLevel) {
 		case LogLevel::LOG_LEVEL_INFO:
-			m_LogFile << TIME << "[INFO] " << message << std::endl;
+			m_LogFile << TIME << "[信息] " << message << std::endl;
 			break;
 		case LogLevel::LOG_LEVEL_WARN:
-			m_LogFile << TIME << "[WARNING] " << message << std::endl;
+			m_LogFile << TIME << "[警告] " << message << std::endl;
 			break;
 		case LogLevel::LOG_LEVEL_ERROR:
-			m_LogFile << TIME << "[ERROR] " << message << std::endl;
+			m_LogFile << TIME << "[糟了] " << message << std::endl;
 			break;
 		case LogLevel::LOG_LEVEL_FATAL:
-			m_LogFile << TIME << "[FATAL] " << message << std::endl;
+			m_LogFile << TIME << "[完蛋了] " << message << std::endl;
 			break;
 		case LogLevel::LOG_LEVEL_DEBUG:
-			m_LogFile << TIME << "[DEBUG] " << message << std::endl;
+			m_LogFile << TIME << "[调试] " << message << std::endl;
 			break;
 		default:
 			break;
@@ -66,19 +66,19 @@ void LogSystem::log(const LogLevel& logLevel, const std::string& message)
 	}
 	switch (logLevel) {
 	case LogLevel::LOG_LEVEL_INFO:
-		std::cout << TIME << DEFAULT << "[INFO] " << message << std::endl;
+		std::cout << TIME << DEFAULT << "[信息] " << message << std::endl;
 		break;
 	case LogLevel::LOG_LEVEL_WARN:
-		std::cout << TIME << YELLOW << "[WARNING] " << message << DEFAULT << std::endl;
+		std::cout << TIME << YELLOW << "[警告] " << message << DEFAULT << std::endl;
 		break;
 	case LogLevel::LOG_LEVEL_ERROR:
-		std::cout << TIME << RED << "[ERROR] " << message << DEFAULT << std::endl;
+		std::cout << TIME << RED << "[糟了] " << message << DEFAULT << std::endl;
 		break;
 	case LogLevel::LOG_LEVEL_FATAL:
-		std::cout << TIME << RED << "[FATAL] " << message << DEFAULT << std::endl;
+		std::cout << TIME << RED << "[完蛋了] " << message << DEFAULT << std::endl;
 		break;
 	case LogLevel::LOG_LEVEL_DEBUG:
-		std::cout << TIME << BLUE << "[DEBUG] " << message << DEFAULT << std::endl;
+		std::cout << TIME << BLUE << "[调试] " << message << DEFAULT << std::endl;
 		break;
 	default:
 		break;

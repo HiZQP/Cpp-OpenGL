@@ -18,12 +18,14 @@ public:
 
 	VertexArray();
 
-	~VertexArray();
+	void deleteIt() const;
 
 	void addBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout);
 
 	void bind() const;
 
 	void unbind() const;
+
+	inline unsigned int getRendererID() const { return m_RendererID;  }
 };
 

@@ -49,7 +49,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLEW_STATIC</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)C++OpenGL\Dependencies\GLFW\include;src\vendor;$(SolutionDir)C++OpenGL\Dependencies\assimp\include;$(SolutionDir)C++OpenGL\Dependencies\GLEW\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)C++OpenGL\Dependencies\GLFW\include;src;src\vendor;$(SolutionDir)C++OpenGL\Dependencies\assimp\include;$(SolutionDir)C++OpenGL\Dependencies\GLEW\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -83,6 +83,8 @@
     <ClCompile Include="src\entities\Entity.cpp" />
     <ClCompile Include="src\entities\SceneObject.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
+    <ClCompile Include="src\Models\Mesh.cpp" />
+    <ClCompile Include="src\Models\Model.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\LogSystem.cpp" />
@@ -108,6 +110,7 @@
     <ClInclude Include="src\entities\SceneObject.h" />
     <ClInclude Include="src\Events\Event.h" />
     <ClInclude Include="src\IndexBuffer.h" />
+    <ClInclude Include="src\Models\Models.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\LogSystem.h" />

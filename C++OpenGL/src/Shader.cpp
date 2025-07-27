@@ -7,12 +7,12 @@ Shader::Shader(const std::string& filePath)
 	ShaderProgramSource source = parseShader(m_FilePath);
 	m_programeID = CreateShader(source.vertexSource, source.fragmentSource);
 	if (m_programeID == 0) {
-		LOG(LogLevel::LOG_LEVEL_ERROR, "Failed to create shader program from file: " + m_FilePath);
+		LOG(LogLevel::LOG_LEVEL_ERROR, "着色器创建失败: " + m_FilePath);
 		return;
 	}
-	LOG(LogLevel::LOG_LEVEL_INFO, "Shader program created successfully from file: " + m_FilePath);
-    LOG(LogLevel::LOG_LEVEL_INFO, "Vertex Shader Source : \n" + source.vertexSource);
-	LOG(LogLevel::LOG_LEVEL_INFO, "Fragment Shader Source : \n" + source.fragmentSource);
+	LOG(LogLevel::LOG_LEVEL_INFO, "着色器创建完成: " + m_FilePath);
+    LOG(LogLevel::LOG_LEVEL_INFO, "顶点着色器源程序: \n" + source.vertexSource);
+	LOG(LogLevel::LOG_LEVEL_INFO, "片元着色器源程序: \n" + source.fragmentSource);
 }
 
 Shader::~Shader()
@@ -30,7 +30,7 @@ void Shader::bind() const
 void Shader::unbind() const
 {
 	glUseProgram(0);
-	LOG(LogLevel::LOG_LEVEL_INFO, "Shader '" + m_FilePath + "' unbound successfully.");
+	LOG(LogLevel::LOG_LEVEL_INFO, "着色器解绑成功: " + m_FilePath);
 }
 
 Shader::ShaderProgramSource Shader::parseShader(const std::string& filePath) {
@@ -97,9 +97,9 @@ unsigned int Shader::compileShader(unsigned int type, const std::string& source)
         glGetShaderInfoLog(id, length, &length, message);
 		// 输出错误信息
         if(type == GL_VERTEX_SHADER) {
-            LOG(LogLevel::LOG_LEVEL_ERROR, "Vertex shader compilation failed: " + std::string(message));
+            LOG(LogLevel::LOG_LEVEL_ERROR, "顶点着色器编译失败: " + std::string(message));
         } else if(type == GL_FRAGMENT_SHADER) {
-            LOG(LogLevel::LOG_LEVEL_ERROR, "Fragment shader compilation failed: " + std::string(message));
+            LOG(LogLevel::LOG_LEVEL_ERROR, "片元着色器编译失败: " + std::string(message));
 		}
         glDeleteShader(id);
         return 0;
@@ -132,7 +132,7 @@ int Shader::getUniformLocation(const std::string& name)
 	int location = glGetUniformLocation(m_programeID, name.c_str());
 	m_UniformLocationCache[name] = location;
 	if (location == -1) {
-		LOG(LogLevel::LOG_LEVEL_ERROR, "Uniform '" + name + "' doesn't exist in shader '" + m_FilePath + "'");
+		LOG(LogLevel::LOG_LEVEL_ERROR, "统一变量 '" + name + "' 不存在于着色器: " + m_FilePath);
 	}
 	return location;
 }

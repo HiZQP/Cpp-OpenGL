@@ -78,6 +78,12 @@
     <ClCompile Include="src\Input.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="src\Models\Mesh.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Models\Model.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\LogSystem.h">
@@ -1014,6 +1020,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Input.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Models\Models.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

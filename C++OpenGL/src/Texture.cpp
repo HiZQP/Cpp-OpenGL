@@ -26,7 +26,7 @@ Texture::Texture(const std::string& path)
 	}
 	else
 	{
-		LOG(LogLevel::LOG_LEVEL_ERROR, "Failed to load texture from path: " + path);
+		LOG(LogLevel::LOG_LEVEL_ERROR, "纹理加载失败: " + path);
 	}
 }
 
@@ -39,11 +39,11 @@ void Texture::bind(unsigned int slot) const
 {
 	GLCall(glActiveTexture(GL_TEXTURE0 + slot)); // 激活纹理单元
 	GLCall(glBindTexture(GL_TEXTURE_2D, m_RendererID)); // 绑定纹理
-	LOG(LogLevel::LOG_LEVEL_INFO, "Texture bound: " + m_FilePath);
+	LOG(LogLevel::LOG_LEVEL_INFO, "纹理绑定完成: " + m_FilePath);
 }
 
 void Texture::unbind() const
 {
 	GLCall(glBindTexture(GL_TEXTURE_2D, 0)); // 解绑纹理
-	LOG(LogLevel::LOG_LEVEL_INFO, "Texture unbound: " + m_FilePath);
+	LOG(LogLevel::LOG_LEVEL_INFO, "纹理解绑完成: " + m_FilePath);
 }
