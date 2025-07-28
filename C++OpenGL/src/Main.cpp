@@ -131,12 +131,10 @@ int main(void)
 
 		Renderer renderer;
         Input input(window);
-		Camera camera(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), 960.0f / 540.0f, 60.0f, 0.1f, 1000.0f);
+		Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 960.0f / 540.0f, 60.0f, 0.1f, 1000.0f);
         float scale = 1.0f;
         glm::vec3 translate = glm::vec3(0.0f);
-
-        glEnable(GL_DEPTH_TEST); // 启用深度测试
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 清屏时同时清除深度缓冲区
+        float cameraSpeed = 0.1f;
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
@@ -152,30 +150,24 @@ int main(void)
             if(input.isKeyPressed(GLFW_KEY_ESCAPE)) {
                 glfwSetWindowShouldClose(window, true);
 			}
-            if(input.isKeyPressed(GLFW_KEY_W)) {
-                camera.move(glm::vec3(0.0f, 0.0f, -1.0f));
-			}
-            if(input.isKeyPressed(GLFW_KEY_S)) {
-				camera.move(glm::vec3(0.0f, 0.0f, 1.0f));
-			}
-			if (input.isKeyPressed(GLFW_KEY_A)) {
-				camera.move(glm::vec3(-1.0f, 0.0f, 0.0f));
-			}
-			if (input.isKeyPressed(GLFW_KEY_D)) {
-				camera.move(glm::vec3(1.0f, 0.0f, 0.0f));
-			}
-			if (input.isKeyPressed(GLFW_KEY_Q)) {
-				camera.move(glm::vec3(0.0f, -1.0f, 0.0f));
-			}
-			if (input.isKeyPressed(GLFW_KEY_E)) {
-				camera.move(glm::vec3(0.0f, 1.0f, 0.0f));
-			}
-            if (input.isKeyPressed(GLFW_KEY_J)) {
-                camera.rotate(glm::vec3(0.0f, 1.0f, 0.0f));
-            }
+            glm::vec3 direction = glm::vec3(0.0f);
+            if (input.isKeyPressed(GLFW_KEY_A))
+                direction.z = -1.0f;
+            if (input.isKeyPressed(GLFW_KEY_D))
+                direction.z = 1.0f;
+            if (input.isKeyPressed(GLFW_KEY_W))
+                direction.x = 1.0f;
+            if (input.isKeyPressed(GLFW_KEY_S))
+                direction.x = -1.0f;
+            if (input.isKeyPressed(GLFW_KEY_Q))
+                direction.y = 1.0f;
+            if (input.isKeyPressed(GLFW_KEY_E))
+                direction.y = -1.0f;
+            camera.move(direction);
+            camera.setSpeed(cameraSpeed);
 			// 鼠标加速度控制相机旋转
                 glm::vec3 mouseAccel = input.getMouseAcceleration();
-            if (input.isKeyPressed(GLFW_KEY_LEFT_CONTROL)) {
+            if (input.isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
                 camera.rotate(glm::vec3(mouseAccel.y, mouseAccel.x, 0.0f)); // 鼠标加速度控制相机旋转
             }
 
@@ -204,6 +196,13 @@ int main(void)
 
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
                 ImGui::End();
+
+				ImGui::Begin("Camera");
+                ImGui::SliderFloat("Camera Speed", &cameraSpeed, 0.01f, 0.2f);
+				ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.getPos().x, camera.getPos().y, camera.getPos().z);
+				ImGui::Text("Camera Rotation: (%.2f, %.2f, %.2f)", camera.getRot().x, camera.getRot().y, camera.getRot().z);
+				ImGui::Text("Camera Front: (%.2f, %.2f, %.2f)", camera.getFront().x, camera.getFront().y, camera.getFront().z);
+				ImGui::End();
             }
 
             ImGui::Render();

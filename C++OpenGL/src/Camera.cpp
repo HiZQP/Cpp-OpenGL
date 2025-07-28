@@ -29,7 +29,9 @@ glm::mat4 Camera::getViewMatrix() const
 
 void Camera::move(const glm::vec3& direction)
 {
-	m_Position += direction * m_Speed;
+	m_Position += m_Front * m_Speed * direction.x;
+	m_Position += m_Right * m_Speed * direction.z;
+	m_Position += m_Up * m_Speed * direction.y;
 	updateCameraFront();
 }
 
