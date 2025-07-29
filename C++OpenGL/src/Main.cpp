@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -65,55 +64,17 @@ int main(void)
 
     {///////////////////////////////////////////////////////////
         /*
-        // 顶点数据
-        float vertexs[] = {
-            // 顶点位置      // 纹理坐标    
-			  0.0f,    0.0f,  0.0f,  0.0f,  0.0f,
-			520.0f,    0.0f,  0.0f,  1.0f,  0.0f,
-			520.0f,  235.0f,  0.0f,  1.0f,  1.0f,
-			  0.0f,  235.0f,  0.0f,  0.0f,  1.0f,
-        };
-
-		// 索引数据
-        unsigned int indexes[] = {
-		    0, 1, 2,
-            2, 3, 0
-        };
-        
-		VertexArray是顶点数组对象（VAO），用于存储顶点缓冲区对象（VBO）和索引缓冲区对象（IBO）的状态。
-		VertexBuffer是顶点缓冲区对象（VBO），用于存储顶点数据并发送至VRAM， 但是不解释顶点数据的布局和含义。
+	    VertexArray是顶点数组对象（VAO），用于存储顶点缓冲区对象（VBO）和索引缓冲区对象（IBO）的状态。
+	    VertexBuffer是顶点缓冲区对象（VBO），用于存储顶点数据并发送至VRAM， 但是不解释顶点数据的布局和含义。
 		IndexBuffer是索引缓冲区对象（IBO），用于存储索引数据，允许我们重用顶点数据来绘制图形，减少VRAM的使用。
 		VertexBufferLayout是一个顶点缓冲区布局，定义了顶点数据的格式和布局，向OpenGL解释如何处理顶点数据。
-        
-		一个（VAO）可以绑定多个（VBO）和（IBO），每个（VBO）可以有自己的布局（VertexBufferLayout）。
-        
-        // 创建顶点缓冲区对象 (VBO) 和索引缓冲区对象 (IBO)
-        VertexBuffer vb(vertexs, sizeof(vertexs));
-
-        // 创建索引缓冲区
-        IndexBuffer ib(indexes, sizeof(indexes) / sizeof(unsigned int));
-
-        // 创建顶点缓冲区布局
-		VertexBufferLayout layout;
-		layout.push<float>(3); // 顶点位置
-		layout.push<float>(2); // 纹理坐标
-
-		// 创建顶点数组对象 (VAO)
-		VertexArray va;                                      
-		va.addBuffer(vb, layout);
         */
-
-        Model building("res/Meshes/building.obj");
 
         Shader GLshader("res/shaders/Basic.shader");
         GLshader.bind();
 
 		GLCall(glEnable(GL_BLEND)); // 开启混合
 		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)); // 设置混合函数
-
-		//Texture texture("res/textures/OpenGL.png");
-		//texture.bind(0);
-		//GLshader.setUniform1i("u_Texture", 0); // 设置纹理单元
 		// ImGui 初始化
         ///////////////////////////////////////////////////////
         ImGui::CreateContext();
@@ -126,15 +87,19 @@ int main(void)
         bool show_another_window = false;
         ///////////////////////////////////////////////////////
 
+		GLCall(glEnable(GL_CULL_FACE)); // 开启背面剔除
+
         glfwSwapInterval(1); // 设置垂直同步，1表示开启垂直同步
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);  // 设置清屏颜色
 
 		Renderer renderer;
         Input input(window);
-		Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 960.0f / 540.0f, 60.0f, 0.1f, 1000.0f);
+		Camera camera(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 960.0f / 540.0f, 60.0f, 0.1f, 1000.0f);
         float scale = 1.0f;
         glm::vec3 translate = glm::vec3(0.0f);
         float cameraSpeed = 0.1f;
+		glm::vec4 ambientColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+        Model ball("res/Meshes/RustyMetalBall/ball.obj");
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
@@ -175,11 +140,14 @@ int main(void)
             model = glm::translate(model, translate);
             model = glm::scale(model, glm::vec3(scale));
 
+			GLshader.setUniform4f("u_Ambient", ambientColor.x, ambientColor.y, ambientColor.z, ambientColor.w);
+
             glm::mat4 mvp = camera.getProjectionMatrix() * camera.getViewMatrix() * model;
 
             GLshader.setUniformMat4f("u_MVP", mvp);
 
-            building.draw(GLshader);
+            ball.draw(GLshader);
+			//renderer.draw(va, ib, GLshader);
 
             //glClear(GL_COLOR_BUFFER_BIT);
             
@@ -188,6 +156,7 @@ int main(void)
             {
                 ImGui::Begin("OpenGL_Test");
                 //ImGui::SliderFloat3("Translation", &translate.x, -500.0f, 500.0f);
+				ImGui::ColorPicker4("Ambient Color", &ambientColor.x);
 				ImGui::SliderFloat("Scale", &scale, 0.0f, 1.0f);
 				// 显示鼠标位置
 				ImGui::Text("MouseX: %f MouseY: %f", input.getMousePosition().x, input.getMousePosition().y);

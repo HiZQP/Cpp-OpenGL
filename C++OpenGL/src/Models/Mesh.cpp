@@ -4,9 +4,6 @@
 #include "VertexBufferLayout.h"
 
 Mesh::~Mesh() {
-	GLCall(glDeleteBuffers(1, &m_Vao));
-	GLCall(glDeleteBuffers(1, &m_Vbo));
-	GLCall(glDeleteBuffers(1, &m_Ebo));
 }
 
 void Mesh::setup() {
@@ -26,8 +23,20 @@ void Mesh::setup() {
 	vao.unbind();
 }
 
-void Mesh::draw(const Shader& shader) {
+void Mesh::draw(Shader& shader) {
 	shader.bind();
+	unsigned int diffuseCount = 1;
+	unsigned int specularCount = 1;
+	for (unsigned int slot = 0; slot < m_Textures.size(); slot++) {
+		GLCall(glActiveTexture(GL_TEXTURE0 + slot)); // 激活纹理单元
+		GLCall(glBindTexture(GL_TEXTURE_2D, m_Textures[slot].id)); // 绑定纹理
+		if (m_Textures[slot].type == "texture_diffuse") {
+			shader.setUniform1i("u_Texture_Diffuse" + std::to_string(diffuseCount++), slot);
+		}
+		else if (m_Textures[slot].type == "texture_specular") {
+			shader.setUniform1i("u_Texture_Specular" + std::to_string(specularCount++), slot);
+		}
+	}
 	GLCall(glBindVertexArray(m_Vao));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Ebo));
 	GLCall(glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, nullptr));

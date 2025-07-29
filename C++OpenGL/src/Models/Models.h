@@ -36,7 +36,7 @@ public:
 
 	void setup();
 
-	void draw(const Shader& shader);
+	void draw(Shader& shader);
 
 private:
 	std::vector<WTE::Vertex> m_Vertices;
@@ -49,14 +49,16 @@ private:
 class Model {
 public:
 	Model(const std::string& path);
+	~Model();
 
-	void draw(const Shader& shader);
+	void draw(Shader& shader);
 
 	std::vector<Mesh> m_Meshes;
 	std::vector<WTE::Texture> m_Textures_Loaded;
 	std::string m_Directory;
 private:
 	void loadModel(const std::string& path);
+	unsigned int loadTextureFromFile(const std::string& path);
 	void processNode(aiNode* node, const aiScene* scene);
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 	std::vector<WTE::Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
