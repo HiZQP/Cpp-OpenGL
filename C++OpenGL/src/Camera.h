@@ -15,10 +15,13 @@ public:
 
 	inline void setSpeed(float speed) { m_Speed = speed; }
 	inline void setMouseSensitivity(float sensitivity) { m_MouseSensitivity = sensitivity; }
+	//…Ë÷√FOV
+	inline void setFov(float fov) { m_Fov = fov; }
 
 	inline const glm::vec3& getPos() const { return m_Position; }
 	inline const glm::vec3& getRot() const { return m_Rotation; }
 	inline const glm::vec3& getFront() const { return m_Front; }
+	inline float getFov() const { return m_Fov; }
 
 private:
 	void updateCameraFront();

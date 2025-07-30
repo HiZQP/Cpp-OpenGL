@@ -99,6 +99,7 @@ int main(void)
         float scale = 1.0f;
         glm::vec3 translate = glm::vec3(0.0f);
         float cameraSpeed = 0.1f;
+		float FOV = 60.0f; // 相机视野范围
 		glm::vec4 ambientColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
         Model ball("res/Meshes/RustyMetalBall/ball.obj");
 
@@ -141,6 +142,7 @@ int main(void)
                 direction.y = -1.0f;
             camera.move(direction);
             camera.setSpeed(cameraSpeed);
+			camera.setFov(FOV);
 			// 鼠标加速度控制相机旋转
                 glm::vec3 mouseAccel = input.getMouseAcceleration();
             if (input.isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
@@ -154,6 +156,8 @@ int main(void)
             GLshader.setUniformMat4f("u_MVP", mvp);
 
             GLshader.setUniform4f("u_Ambient", ambientColor.x, ambientColor.y, ambientColor.z, ambientColor.w);
+
+			GLshader.setUniform3f("u_CameraPos", camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
             ball.draw(GLshader);
             
@@ -173,6 +177,7 @@ int main(void)
                 ImGui::End();
 
 				ImGui::Begin("Camera");
+				ImGui::SliderFloat("FOV", &FOV, 5.0f, 120.0f);
                 ImGui::SliderFloat("Camera Speed", &cameraSpeed, 0.01f, 0.2f);
 				ImGui::Text("Camera Position: (%.2f, %.2f, %.2f)", camera.getPos().x, camera.getPos().y, camera.getPos().z);
 				ImGui::Text("Camera Rotation: (%.2f, %.2f, %.2f)", camera.getRot().x, camera.getRot().y, camera.getRot().z);
