@@ -21,6 +21,7 @@
 #include "Input.h"
 #include "Camera.h"
 #include "Models/Models.h"
+#include "SceneLight.h"
 
 int main(void)
 {
@@ -39,8 +40,8 @@ int main(void)
     }
 
     // 使用OpenGL 3.3 核心配置文件
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
@@ -101,6 +102,16 @@ int main(void)
 		glm::vec4 ambientColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
         Model ball("res/Meshes/RustyMetalBall/ball.obj");
 
+		// 设置光源
+		DirectionalLight directionalLight;
+		directionalLight.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // 白色光
+		directionalLight.direction = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f); // 从上方照射
+		SceneLightManager sceneLightManager;
+		sceneLightManager.addLight(directionalLight);
+		// 更新光源数据
+		sceneLightManager.updateDirectionalLights();
+
+
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window))
         {
@@ -139,17 +150,12 @@ int main(void)
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, translate);
             model = glm::scale(model, glm::vec3(scale));
-
-			GLshader.setUniform4f("u_Ambient", ambientColor.x, ambientColor.y, ambientColor.z, ambientColor.w);
-
             glm::mat4 mvp = camera.getProjectionMatrix() * camera.getViewMatrix() * model;
-
             GLshader.setUniformMat4f("u_MVP", mvp);
 
-            ball.draw(GLshader);
-			//renderer.draw(va, ib, GLshader);
+            GLshader.setUniform4f("u_Ambient", ambientColor.x, ambientColor.y, ambientColor.z, ambientColor.w);
 
-            //glClear(GL_COLOR_BUFFER_BIT);
+            ball.draw(GLshader);
             
 			// ImGui 渲染
             ///////////////////////////////////////////////////////

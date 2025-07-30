@@ -7,7 +7,7 @@ Shader::Shader(const std::string& filePath)
 	ShaderProgramSource source = parseShader(m_FilePath);
 	m_programeID = CreateShader(source.vertexSource, source.fragmentSource);
 	if (m_programeID == 0) {
-		LOG(LogLevel::LOG_LEVEL_ERROR, "着色器创建失败: " + m_FilePath);
+		LOG(LogLevel::LOG_LEVEL_FATAL, "着色器创建失败: " + m_FilePath);
 		return;
 	}
 	LOG(LogLevel::LOG_LEVEL_INFO, "着色器创建完成: " + m_FilePath);
@@ -71,6 +71,11 @@ void Shader::setUniform1f(const std::string& name, float value)
 	GLCall(glUniform1f(getUniformLocation(name), value));
 }
 
+void Shader::setUniform3f(const std::string& name, float v0, float v1, float v2)
+{
+	GLCall(glUniform3f(getUniformLocation(name), v0, v1, v2));
+}
+
 void Shader::setUniform4f(const std::string& name, float v0, float v1, float v2, float v3)
 {
     GLCall(glUniform4f(getUniformLocation(name), v0, v1, v2, v3));
@@ -97,9 +102,9 @@ unsigned int Shader::compileShader(unsigned int type, const std::string& source)
         glGetShaderInfoLog(id, length, &length, message);
 		// 输出错误信息
         if(type == GL_VERTEX_SHADER) {
-            LOG(LogLevel::LOG_LEVEL_ERROR, "顶点着色器编译失败: " + std::string(message));
+            LOG(LogLevel::LOG_LEVEL_FATAL, "顶点着色器编译失败: " + std::string(message));
         } else if(type == GL_FRAGMENT_SHADER) {
-            LOG(LogLevel::LOG_LEVEL_ERROR, "片元着色器编译失败: " + std::string(message));
+            LOG(LogLevel::LOG_LEVEL_FATAL, "片元着色器编译失败: " + std::string(message));
 		}
         glDeleteShader(id);
         return 0;
