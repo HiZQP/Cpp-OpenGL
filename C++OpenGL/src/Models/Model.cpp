@@ -72,6 +72,21 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 			vertex.normal.y = mesh->mNormals[i].y;
 			vertex.normal.z = mesh->mNormals[i].z;
 		}
+		else {
+			vertex.normal = glm::vec3(0.0f, 0.0f, 0.0f);
+		}
+		if (mesh->HasTangentsAndBitangents()) {
+			vertex.tangent.x = mesh->mTangents[i].x;
+			vertex.tangent.y = mesh->mTangents[i].y;
+			vertex.tangent.z = mesh->mTangents[i].z;
+			vertex.bitangent.x = mesh->mBitangents[i].x;
+			vertex.bitangent.y = mesh->mBitangents[i].y;
+			vertex.bitangent.z = mesh->mBitangents[i].z;
+		}
+		else {
+			vertex.tangent = glm::vec3(0.0f, 0.0f, 0.0f);
+			vertex.bitangent = glm::vec3(0.0f, 0.0f, 0.0f);
+		}
 		if (mesh->mTextureCoords[0]) {
 			vertex.texCoord.x = mesh->mTextureCoords[0][i].x;
 			vertex.texCoord.y = mesh->mTextureCoords[0][i].y;
@@ -88,7 +103,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		}
 	}
 
-	if (mesh->mMaterialIndex >= 0) {
+	if (mesh->mMaterialIndex >= 0 ) {
+
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 		// 漫反射
 		std::vector<WTE::Texture> diffuseMaps = loadMaterialTextures(material,
@@ -100,6 +116,11 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 																	 aiTextureType_SPECULAR,
 																	 "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+		// 法线纹理
+		std::vector<WTE::Texture> normalMaps = loadMaterialTextures(material,
+																	 aiTextureType_NORMALS,
+																	 "texture_normal");
+		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 	}
 	return Mesh(vertices, indices, textures);
 }
@@ -110,6 +131,7 @@ std::vector<WTE::Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTexture
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
 		mat->GetTexture(type, i, &str);
+		LOG(LogLevel::LOG_LEVEL_INFO, "加载纹理: " + std::string(str.C_Str()));
 		bool skip = false;
 		for (unsigned int j = 0; j < m_Textures_Loaded.size(); j++) {
 			if (std::strcmp(m_Textures_Loaded[j].path.data(), str.C_Str()) == 0) {

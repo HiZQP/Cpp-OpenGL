@@ -98,10 +98,11 @@ int main(void)
 		Camera camera(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 960.0f / 540.0f, 60.0f, 0.1f, 1000.0f);
         float scale = 1.0f;
         glm::vec3 translate = glm::vec3(0.0f);
+		glm::vec3 rotate = glm::vec3(0.0f);
         float cameraSpeed = 0.1f;
 		float FOV = 60.0f; // 相机视野范围
 		glm::vec4 ambientColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
-        Model ball("res/Meshes/RustyMetalBall/ball.obj");
+        Model ball("res/Meshes/RustyMetalBall/ball.fbx");
 
 		// 设置光源
 		DirectionalLight directionalLight;
@@ -150,10 +151,20 @@ int main(void)
             }
 
             glm::mat4 model = glm::mat4(1.0f);
+            glm::mat4 view = camera.getViewMatrix();
+            glm::mat4 projection = camera.getProjectionMatrix();
+			// 设置平移
             model = glm::translate(model, translate);
+            // 设置旋转
+			model = glm::rotate(model, glm::radians(rotate.x), glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(rotate.y), glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, glm::radians(rotate.z), glm::vec3(0.0f, 0.0f, 1.0f));
+			// 设置缩放
             model = glm::scale(model, glm::vec3(scale));
-            glm::mat4 mvp = camera.getProjectionMatrix() * camera.getViewMatrix() * model;
-            GLshader.setUniformMat4f("u_MVP", mvp);
+            
+            GLshader.setUniformMat4f("u_Model", model);
+            GLshader.setUniformMat4f("u_View", view);
+            GLshader.setUniformMat4f("u_Projection", projection);
 
             GLshader.setUniform4f("u_Ambient", ambientColor.x, ambientColor.y, ambientColor.z, ambientColor.w);
 
@@ -165,9 +176,11 @@ int main(void)
             ///////////////////////////////////////////////////////
             {
                 ImGui::Begin("OpenGL_Test");
-                //ImGui::SliderFloat3("Translation", &translate.x, -500.0f, 500.0f);
-				ImGui::ColorPicker4("Ambient Color", &ambientColor.x);
+                ImGui::SliderFloat3("Translation", &translate.x, -50.0f, 50.0f);
+				ImGui::SliderFloat3("Rotation", &rotate.x, -180.0f, 180.0f);
 				ImGui::SliderFloat("Scale", &scale, 0.0f, 1.0f);
+
+				ImGui::ColorPicker4("Ambient Color", &ambientColor.x);
 				// 显示鼠标位置
 				ImGui::Text("MouseX: %f MouseY: %f", input.getMousePosition().x, input.getMousePosition().y);
                 // 显示鼠标加速度

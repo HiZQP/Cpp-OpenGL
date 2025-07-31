@@ -15,6 +15,8 @@ void Mesh::setup() {
 	VertexBufferLayout layout;
 	layout.push<float>(3);
 	layout.push<float>(3);
+	layout.push<float>(3);
+	layout.push<float>(3);
 	layout.push<float>(2);
 
 	VertexArray vao;
@@ -27,6 +29,7 @@ void Mesh::draw(Shader& shader) {
 	shader.bind();
 	unsigned int diffuseCount = 1;
 	unsigned int specularCount = 1;
+	unsigned int normalCount = 1;
 	for (unsigned int slot = 0; slot < m_Textures.size(); slot++) {
 		GLCall(glActiveTexture(GL_TEXTURE0 + slot)); // 激活纹理单元
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_Textures[slot].id)); // 绑定纹理
@@ -35,6 +38,9 @@ void Mesh::draw(Shader& shader) {
 		}
 		else if (m_Textures[slot].type == "texture_specular") {
 			shader.setUniform1i("u_Texture_Specular" + std::to_string(specularCount++), slot);
+		}
+		else if (m_Textures[slot].type == "texture_normal") {
+			shader.setUniform1i("u_Texture_Normal" + std::to_string(normalCount++), slot);
 		}
 	}
 	GLCall(glBindVertexArray(m_Vao));
