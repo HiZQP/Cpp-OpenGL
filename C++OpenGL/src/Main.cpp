@@ -22,6 +22,11 @@
 #include "Camera.h"
 #include "Models/Models.h"
 #include "SceneLight.h"
+#include "Events/Event.h"
+#include "Events/InputEvent.h"
+
+
+
 
 int main(void)
 {
@@ -54,6 +59,10 @@ int main(void)
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
+
+	// 初始化事件管理和输入管理
+	auto eventPublisher = std::make_shared<EventPublisher>();
+    Input::getInstance().init(window, eventPublisher);
 
     LOG(LogLevel::LOG_LEVEL_INFO, "OpenGL 版本: " + std::string((const char*)glGetString(GL_VERSION)));
 
@@ -94,13 +103,13 @@ int main(void)
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);  // 设置清屏颜色
 
 		Renderer renderer;
-        Input input(window);
 		Camera camera(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 960.0f / 540.0f, 60.0f, 0.1f, 1000.0f);
         float scale = 1.0f;
         glm::vec3 translate = glm::vec3(0.0f);
 		glm::vec3 rotate = glm::vec3(0.0f);
         float cameraSpeed = 0.1f;
 		float FOV = 60.0f; // 相机视野范围
+        glm::vec3 direction = glm::vec3(0.0f, 0.0f, 0.0f);
 		glm::vec4 ambientColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
         Model ball("res/Meshes/RustyMetalBall/ball.fbx");
 
@@ -114,9 +123,11 @@ int main(void)
 		sceneLightManager.updateDirectionalLights();
 
 
-        /* Loop until the user closes the window */
+		// 渲染循环
         while (!glfwWindowShouldClose(window))
         {
+			Input::getInstance().updateRawInputInLoop();
+
             /* 在这里渲染 */
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -124,31 +135,18 @@ int main(void)
 
 			renderer.clear();
 
-			// 处理输入
-            if(input.isKeyPressed(GLFW_KEY_ESCAPE)) {
-                glfwSetWindowShouldClose(window, true);
-			}
-            glm::vec3 direction = glm::vec3(0.0f);
-            if (input.isKeyPressed(GLFW_KEY_A))
-                direction.z = -1.0f;
-            if (input.isKeyPressed(GLFW_KEY_D))
-                direction.z = 1.0f;
-            if (input.isKeyPressed(GLFW_KEY_W))
-                direction.x = 1.0f;
-            if (input.isKeyPressed(GLFW_KEY_S))
-                direction.x = -1.0f;
-            if (input.isKeyPressed(GLFW_KEY_Q))
-                direction.y = 1.0f;
-            if (input.isKeyPressed(GLFW_KEY_E))
-                direction.y = -1.0f;
+            eventPublisher.subscribe<KeyEvent>([](const KeyEvent& event) {
+                if (event.getKeyAction() == KeyEvent::KeyAction::Press) {
+                    LOG(LogLevel::LOG_LEVEL_INFO, "Key Pressed: " + std::to_string(event.getKey()));
+                }
+				});
+
             camera.move(direction);
             camera.setSpeed(cameraSpeed);
 			camera.setFov(FOV);
 			// 鼠标加速度控制相机旋转
-                glm::vec3 mouseAccel = input.getMouseAcceleration();
-            if (input.isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {
-                camera.rotate(glm::vec3(mouseAccel.y, mouseAccel.x, 0.0f)); // 鼠标加速度控制相机旋转
-            }
+            
+            glm::vec3 mouseAccel = glm::vec3(0.0f, 0.0f, 0.0f);
 
             glm::mat4 model = glm::mat4(1.0f);
             glm::mat4 view = camera.getViewMatrix();
@@ -182,7 +180,7 @@ int main(void)
 
 				ImGui::ColorPicker4("Ambient Color", &ambientColor.x);
 				// 显示鼠标位置
-				ImGui::Text("MouseX: %f MouseY: %f", input.getMousePosition().x, input.getMousePosition().y);
+				//ImGui::Text("MouseX: %f MouseY: %f", input.getMousePosition().x, input.getMousePosition().y);
                 // 显示鼠标加速度
 				ImGui::Text("Mouse Acceleration: X: %.3f Y: %.3f Z: %.3f", mouseAccel.x, mouseAccel.y, mouseAccel.z);
 
