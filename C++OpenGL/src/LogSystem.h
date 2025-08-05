@@ -52,11 +52,8 @@ private:
 	~LogSystem();
 
 public:
-
 	static LogSystem& getInstance();
-
 	LogSystem(const LogSystem&) = delete; // ½ûÖ¹¿½±´¹¹Ôìº¯Êý
-	
 	LogSystem& operator=(const LogSystem&) = delete; // ½ûÖ¹¸³Öµ²Ù×÷·û
 
 	void init(const std::string& logFilePath, const std::string& logObject, const bool& logToFile);

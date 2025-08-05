@@ -18,12 +18,15 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="SceneEditor.cpp">
+    <ClCompile Include="src\SceneEditor.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SceneEditor.h">
+    <ClInclude Include="src\SceneEditor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Controller\EditorController.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

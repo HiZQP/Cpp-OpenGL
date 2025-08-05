@@ -18,15 +18,12 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Texture.h"
-#include "Input.h"
+#include "Input/Input.h"
 #include "Camera.h"
 #include "Models/Models.h"
 #include "SceneLight.h"
 #include "Events/Event.h"
 #include "Events/InputEvent.h"
-
-
-
 
 int main(void)
 {
@@ -122,24 +119,29 @@ int main(void)
 		// 更新光源数据
 		sceneLightManager.updateDirectionalLights();
 
+		// 不要在渲染循环中订阅事件，应该在初始化时订阅事件
+        eventPublisher->subscribe<KeyEvent>([](const KeyEvent& event) {
+            if (event.getKeyAction() == KeyEvent::KeyAction::Press)
+                LOG(LogLevel::LOG_LEVEL_INFO, "Key Pressed: " + std::to_string(event.getKeyInt()));
+            else if (event.getKeyAction() == KeyEvent::KeyAction::Release)
+                LOG(LogLevel::LOG_LEVEL_INFO, "Key Released: " + std::to_string(event.getKeyInt()));
+            });
+        eventPublisher->subscribe<MouseButtonEvent>([](const MouseButtonEvent& event) {
+            if (event.getMouseButtonAction() == MouseButtonEvent::MouseButtonAction::Press)
+                LOG(LogLevel::LOG_LEVEL_INFO, "MouseButton Pressed: " + std::to_string(event.getMouseButtonInt()));
+            else if (event.getMouseButtonAction() == MouseButtonEvent::MouseButtonAction::Release)
+                LOG(LogLevel::LOG_LEVEL_INFO, "MouseButton Released: " + std::to_string(event.getMouseButtonInt()));
+            });
 
 		// 渲染循环
         while (!glfwWindowShouldClose(window))
         {
-			Input::getInstance().updateRawInputInLoop();
-
             /* 在这里渲染 */
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
 			renderer.clear();
-
-            eventPublisher.subscribe<KeyEvent>([](const KeyEvent& event) {
-                if (event.getKeyAction() == KeyEvent::KeyAction::Press) {
-                    LOG(LogLevel::LOG_LEVEL_INFO, "Key Pressed: " + std::to_string(event.getKey()));
-                }
-				});
 
             camera.move(direction);
             camera.setSpeed(cameraSpeed);

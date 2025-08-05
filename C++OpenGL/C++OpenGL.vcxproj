@@ -78,10 +78,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Input.cpp" />
+    <ClCompile Include="src\RenderControl.cpp" />
+    <ClCompile Include="src\Controller\Controller.cpp" />
+    <ClCompile Include="src\Input\Input.cpp" />
     <ClCompile Include="src\Camera.cpp" />
-    <ClCompile Include="src\entities\Entity.cpp" />
-    <ClCompile Include="src\entities\SceneObject.cpp" />
+    <ClCompile Include="src\Entities\Entity.cpp" />
+    <ClCompile Include="src\Entities\SceneObject.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Models\Mesh.cpp" />
@@ -105,14 +107,17 @@
     <ClCompile Include="src\UniformBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\RenderControl.h" />
+    <ClInclude Include="src\Controller\Controller.h" />
     <ClInclude Include="src\CppOpenGL.h" />
     <ClInclude Include="src\Events\InputEvent.h" />
+    <ClInclude Include="src\Input\InputCode.h" />
     <ClInclude Include="src\SceneLight.h" />
-    <ClInclude Include="src\Input.h" />
+    <ClInclude Include="src\Input\Input.h" />
     <ClInclude Include="src\Camera.h" />
-    <ClInclude Include="src\entities\components\Components.h" />
-    <ClInclude Include="src\entities\Entity.h" />
-    <ClInclude Include="src\entities\SceneObject.h" />
+    <ClInclude Include="src\Entities\components\Components.h" />
+    <ClInclude Include="src\Entities\Entity.h" />
+    <ClInclude Include="src\Entities\SceneObject.h" />
     <ClInclude Include="src\Events\Event.h" />
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\Models\Models.h" />

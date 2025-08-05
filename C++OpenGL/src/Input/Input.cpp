@@ -1,4 +1,6 @@
 #include "Input.h"
+#include "Input/InputCode.h"
+#include <imgui/imgui.h>
 
 Input& Input::getInstance(){
 	static Input instance;
@@ -8,7 +10,9 @@ Input& Input::getInstance(){
 void Input::init(GLFWwindow* window, std::shared_ptr<EventPublisher> eventPublisher){
 	m_Window = window;
 	m_EventPublisher = std::move(eventPublisher);
+	// 设置回调函数
 	glfwSetKeyCallback(m_Window, &Input::updateKeyInput);
+	glfwSetMouseButtonCallback(m_Window, &Input::updateMouseButtonInput);
 }
 
 bool Input::isKeyPressed(int key) const{
@@ -36,21 +40,16 @@ glm::vec3 Input::getMouseOffset() const{
 	return glm::vec3(deltaX, deltaY, 0.0f);
 }
 
-void Input::updateRawInputInLoop()
-{
-	glfwSetKeyCallback(m_Window, &Input::updateKeyInput);
-	glfwSetMouseButtonCallback(m_Window, &Input::updateMouseButtonInput);
-}
-
+// GLFW回调函数，接受并发布输入信息
 void Input::updateKeyInput(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	KeyEvent keyEvent(key, (KeyEvent::KeyAction)action);
+	KeyEvent keyEvent((KeyCode)key, (KeyEvent::KeyAction)action);
 	Input::getInstance().m_EventPublisher->dispatch(keyEvent);
 }
 
 void Input::updateMouseButtonInput(GLFWwindow* window, int button, int action, int mods)
 {
-	MouseButtonEvent mouseButtonEvent(button, (MouseButtonEvent::MouseButtonAction)action);
+	MouseButtonEvent mouseButtonEvent((MouseCode)button, (MouseButtonEvent::MouseButtonAction)action);
 	Input::getInstance().m_EventPublisher->dispatch(mouseButtonEvent);
 }
 
@@ -59,9 +58,11 @@ void Input::updateMousePositionInput(GLFWwindow* window, double xpos, double ypo
 	MouseMovedEvent mouseMovedEvent(xpos, ypos);
 	Input::getInstance().m_EventPublisher->dispatch(mouseMovedEvent);
 }
+//
 
 Input::Input()
 	: m_Window(nullptr), m_EventPublisher(nullptr) {
 }
+
 Input::~Input() {
 }

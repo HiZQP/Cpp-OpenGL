@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer.h"
+#include "glm/glm.hpp"
 #include "Events/InputEvent.h"
 
 class Input{

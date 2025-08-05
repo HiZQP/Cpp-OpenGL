@@ -1,23 +1,25 @@
 #pragma once
 
 #include "Event.h"
+#include "Input/InputCode.h"
 
 class KeyEvent : public Event {
 public:
 	enum class KeyAction { Unknown = -1, Release, Press, Repeat };
 
-	KeyEvent(const int& key, const KeyAction& action)
+	KeyEvent(const KeyCode& key, const KeyAction& action)
 		:m_Key(key), m_KeyAction(action){ }
 
 	EventType getType() const override { return EventType::KeyPressed; }
 	static EventType getStaticType() { return EventType::KeyPressed; }
 
-	inline int getKey() const { return m_Key; }
+	inline int getKeyInt() const { return (int)m_Key; }
+	inline KeyCode getKey() const { return m_Key; }
 	inline int getKeyActionInt() const { return (int)m_KeyAction; }
 	inline KeyAction getKeyAction() const { return m_KeyAction; }
 
 private:
-	int m_Key;
+	KeyCode m_Key;
 	KeyAction m_KeyAction;
 };
 
@@ -34,20 +36,21 @@ private:
 
 class MouseButtonEvent : public Event {
 public:
-	enum class MouseButtonAction { Unknown = -1, Release, Press£¬Repeat };
+	enum class MouseButtonAction { Unknown = -1, Release, Press, Repeat };
 
-	MouseButtonEvent(int mouseButton, MouseButtonAction action)
+	MouseButtonEvent(const MouseCode& mouseButton, const MouseButtonAction& action)
 		:m_MouseButton(mouseButton), m_MouseButtonAction(action){ }
 
 	EventType getType() const override { return EventType::MouseButtonPressed; }
 	static EventType getStaticType() { return EventType::MouseButtonPressed; }
 
-	inline int getMouseButton() const { return m_MouseButton; }
+	inline int getMouseButtonInt() const { return (int)m_MouseButton; }
+	inline MouseCode getMouseButton() const { return m_MouseButton; }
 	inline int getMouseButtonActionInt() const { return (int)m_MouseButtonAction; }
 	inline MouseButtonAction getMouseButtonAction() const { return m_MouseButtonAction; }
 
 private:
-	int m_MouseButton;
+	MouseCode m_MouseButton;
 	MouseButtonAction m_MouseButtonAction;
 };
 

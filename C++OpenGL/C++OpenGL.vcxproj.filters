@@ -63,16 +63,16 @@
     <ClCompile Include="src\vendor\imgui\imgui_widgets.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\entities\SceneObject.cpp">
+    <ClCompile Include="src\Entities\SceneObject.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\entities\Entity.cpp">
+    <ClCompile Include="src\Entities\Entity.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\Input.cpp">
+    <ClCompile Include="src\Input\Input.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\Models\Mesh.cpp">
@@ -88,6 +88,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\Main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Controller\Controller.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RenderControl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1010,13 +1016,13 @@
     <ClInclude Include="src\vendor\imgui\imgui_impl_opengl3_loader.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\entities\Entity.h">
+    <ClInclude Include="src\Entities\Entity.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\entities\components\Components.h">
+    <ClInclude Include="src\Entities\components\Components.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\entities\SceneObject.h">
+    <ClInclude Include="src\Entities\SceneObject.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Camera.h">
@@ -1025,7 +1031,7 @@
     <ClInclude Include="src\Events\Event.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\Input.h">
+    <ClInclude Include="src\Input\Input.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Models\Models.h">
@@ -1041,6 +1047,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\Events\InputEvent.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Input\InputCode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Controller\Controller.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RenderControl.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
