@@ -32,7 +32,7 @@ void Model::loadModel(const std::string& path) {
 		return;
 	}
 
-	m_Directory = path.substr(0, path.find_last_of('/'));
+   m_Directory = path.substr(0, path.find_last_of("/\\"));
 
 	processNode(scene->mRootNode, scene);
 }

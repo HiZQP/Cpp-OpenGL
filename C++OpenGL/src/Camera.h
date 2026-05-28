@@ -15,6 +15,7 @@ public:
 
 	inline void setSpeed(float speed) { m_Speed = speed; }
 	inline void setMouseSensitivity(float sensitivity) { m_MouseSensitivity = sensitivity; }
+ inline void setAspectRatio(float aspectRatio) { m_AspectRatio = aspectRatio; }
 	//…Ë÷√FOV
 	inline void setFov(float fov) { m_Fov = fov; }
 

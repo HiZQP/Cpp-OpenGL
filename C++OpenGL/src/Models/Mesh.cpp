@@ -30,19 +30,25 @@ void Mesh::draw(Shader& shader) {
 	unsigned int diffuseCount = 1;
 	unsigned int specularCount = 1;
 	unsigned int normalCount = 1;
+ bool hasDiffuseMap = false;
+	bool hasNormalMap = false;
 	for (unsigned int slot = 0; slot < m_Textures.size(); slot++) {
 		GLCall(glActiveTexture(GL_TEXTURE0 + slot)); // 激活纹理单元
 		GLCall(glBindTexture(GL_TEXTURE_2D, m_Textures[slot].id)); // 绑定纹理
 		if (m_Textures[slot].type == "texture_diffuse") {
 			shader.setUniform1i("u_Texture_Diffuse" + std::to_string(diffuseCount++), slot);
+           hasDiffuseMap = true;
 		}
 		else if (m_Textures[slot].type == "texture_specular") {
 			shader.setUniform1i("u_Texture_Specular" + std::to_string(specularCount++), slot);
 		}
 		else if (m_Textures[slot].type == "texture_normal") {
 			shader.setUniform1i("u_Texture_Normal" + std::to_string(normalCount++), slot);
+           hasNormalMap = true;
 		}
 	}
+   shader.setUniform1i("u_HasDiffuseMap", hasDiffuseMap ? 1 : 0);
+	shader.setUniform1i("u_HasNormalMap", hasNormalMap ? 1 : 0);
 	GLCall(glBindVertexArray(m_Vao));
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Ebo));
 	GLCall(glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, nullptr));

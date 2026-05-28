@@ -46,6 +46,8 @@ layout(std140, binding = 0) uniform directionalLight {
 
 uniform sampler2D u_Texture_Diffuse1;
 uniform sampler2D u_Texture_Normal1;
+uniform bool u_HasDiffuseMap;
+uniform bool u_HasNormalMap;
 uniform vec3 u_CameraPos;
 uniform vec4 u_Ambient;
 
@@ -57,11 +59,14 @@ in mat3 v_TBN;
 out vec4 Fragcolor;
 
 void main() {
-    vec4 texColor = texture(u_Texture_Diffuse1, v_TexCoord);
-    // 从法线贴图获取切线空间法线 [0,1] -> [-1,1]
-    vec3 normalMap = texture(u_Texture_Normal1, v_TexCoord).rgb;
-    normalMap = normalize(normalMap * 2.0 - 1.0);
-    vec3 map_Nnormal = normalize(v_TBN * normalMap);
+    vec4 texColor = u_HasDiffuseMap ? texture(u_Texture_Diffuse1, v_TexCoord) : vec4(1.0);
+    vec3 map_Nnormal = normalize(v_Normal);
+    if (u_HasNormalMap) {
+        // 从法线贴图获取切线空间法线 [0,1] -> [-1,1]
+        vec3 normalMap = texture(u_Texture_Normal1, v_TexCoord).rgb;
+        normalMap = normalize(normalMap * 2.0 - 1.0);
+        map_Nnormal = normalize(v_TBN * normalMap);
+    }
     
     vec3 viewDir = normalize(u_CameraPos - v_FragPos);
     

@@ -13,6 +13,7 @@ void Input::init(GLFWwindow* window, std::shared_ptr<EventPublisher> eventPublis
 	// 设置回调函数
 	glfwSetKeyCallback(m_Window, &Input::updateKeyInput);
 	glfwSetMouseButtonCallback(m_Window, &Input::updateMouseButtonInput);
+    glfwSetCursorPosCallback(m_Window, &Input::updateMousePositionInput);
 }
 
 bool Input::isKeyPressed(int key) const{

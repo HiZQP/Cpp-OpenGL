@@ -2,6 +2,9 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <memory>
+
+#include "vendor/windowsInclude.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -24,6 +27,23 @@
 #include "SceneLight.h"
 #include "Events/Event.h"
 #include "Events/InputEvent.h"
+
+namespace {
+    std::string OpenModelFileDialog() {
+        char filePath[MAX_PATH] = {};
+        OPENFILENAMEA ofn = {};
+        ofn.lStructSize = sizeof(ofn);
+        ofn.hwndOwner = nullptr;
+        ofn.lpstrFile = filePath;
+        ofn.nMaxFile = MAX_PATH;
+        ofn.lpstrFilter = "Model Files\0*.fbx;*.obj;*.gltf;*.glb;*.dae;*.3ds;*.blend;*.stl;*.ply;*.x\0All Files\0*.*\0";
+        ofn.nFilterIndex = 1;
+        ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+        if (GetOpenFileNameA(&ofn))
+            return std::string(filePath);
+        return std::string();
+    }
+}
 
 int main(void)
 {
@@ -101,14 +121,19 @@ int main(void)
 
 		Renderer renderer;
 		Camera camera(glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 960.0f / 540.0f, 60.0f, 0.1f, 1000.0f);
+     int framebufferWidth = 960;
+        int framebufferHeight = 540;
         float scale = 1.0f;
         glm::vec3 translate = glm::vec3(0.0f);
 		glm::vec3 rotate = glm::vec3(0.0f);
         float cameraSpeed = 0.1f;
+        float mouseSensitivity = 0.1f;
 		float FOV = 60.0f; // 相机视野范围
         glm::vec3 direction = glm::vec3(0.0f, 0.0f, 0.0f);
-		glm::vec4 ambientColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
-        Model ball("res/Meshes/RustyMetalBall/ball.fbx");
+        glm::vec3 mouseAccel = glm::vec3(0.0f, 0.0f, 0.0f);
+        bool enableMouseRotate = false;
+        glm::vec4 ambientColor = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
+        auto openModel = std::make_unique<Model>("res/Meshes/RustyMetalBall/ball.fbx");
 
 		// 设置光源
 		DirectionalLight directionalLight;
@@ -133,9 +158,58 @@ int main(void)
                 LOG(LogLevel::LOG_LEVEL_INFO, "MouseButton Released: " + std::to_string(event.getMouseButtonInt()));
             });
 
+        eventPublisher->subscribe<MouseButtonEvent>([&enableMouseRotate](const MouseButtonEvent& event) {
+            if (event.getMouseButtonInt() != GLFW_MOUSE_BUTTON_MIDDLE)
+                return;
+            enableMouseRotate = event.getMouseButtonAction() == MouseButtonEvent::MouseButtonAction::Press;
+        });
+
+        // 移动摄像机
+        eventPublisher->subscribe<KeyEvent>([&direction](const KeyEvent& event) {
+            if (event.getKeyAction() == KeyEvent::KeyAction::Press) {
+                if (event.getKeyInt() == GLFW_KEY_W)
+                    direction.x = 1.0f;
+                else if (event.getKeyInt() == GLFW_KEY_S)
+                    direction.x = -1.0f;
+                else if (event.getKeyInt() == GLFW_KEY_A)
+                    direction.z = -1.0f;
+                else if (event.getKeyInt() == GLFW_KEY_D)
+                    direction.z = 1.0f;
+                else if (event.getKeyInt() == GLFW_KEY_R)
+                    direction.y = -1.0f;
+                else if (event.getKeyInt() == GLFW_KEY_F)
+                    direction.y = 1.0f;
+            }
+            else if (event.getKeyAction() == KeyEvent::KeyAction::Release) {
+                if (event.getKeyInt() == GLFW_KEY_W || event.getKeyInt() == GLFW_KEY_S)
+                    direction.x = 0.0f;
+                else if (event.getKeyInt() == GLFW_KEY_A || event.getKeyInt() == GLFW_KEY_D)
+                    direction.z = 0.0f;
+                else if (event.getKeyInt() == GLFW_KEY_R || event.getKeyInt() == GLFW_KEY_F)
+                    direction.y = 0.0f;
+            }
+            });
+        // 旋转摄像机
+        eventPublisher->subscribe<MouseMovedEvent>([&camera, &mouseAccel, &mouseSensitivity, &enableMouseRotate](const MouseMovedEvent& event) {
+            glm::vec3 mouse = event.getMouseOffset();
+            mouseAccel = glm::vec3(mouse.x * mouseSensitivity, mouse.y * mouseSensitivity, 0.0f);
+            if (enableMouseRotate)
+                camera.rotate(glm::vec3(mouseAccel.y, mouseAccel.x, 0.0f));
+            });
+
 		// 渲染循环
         while (!glfwWindowShouldClose(window))
         {
+            int currentWidth = 0;
+            int currentHeight = 0;
+            glfwGetFramebufferSize(window, &currentWidth, &currentHeight);
+            if (currentWidth > 0 && currentHeight > 0 &&
+                (currentWidth != framebufferWidth || currentHeight != framebufferHeight)) {
+                framebufferWidth = currentWidth;
+                framebufferHeight = currentHeight;
+                GLCall(glViewport(0, 0, framebufferWidth, framebufferHeight));
+                camera.setAspectRatio(static_cast<float>(framebufferWidth) / static_cast<float>(framebufferHeight));
+            }
             /* 在这里渲染 */
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -145,10 +219,9 @@ int main(void)
 
             camera.move(direction);
             camera.setSpeed(cameraSpeed);
+            camera.setMouseSensitivity(mouseSensitivity);
 			camera.setFov(FOV);
 			// 鼠标加速度控制相机旋转
-            
-            glm::vec3 mouseAccel = glm::vec3(0.0f, 0.0f, 0.0f);
 
             glm::mat4 model = glm::mat4(1.0f);
             glm::mat4 view = camera.getViewMatrix();
@@ -170,13 +243,13 @@ int main(void)
 
 			GLshader.setUniform3f("u_CameraPos", camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
-            ball.draw(GLshader);
+           openModel->draw(GLshader);
             
 			// ImGui 渲染
             ///////////////////////////////////////////////////////
             {
                 ImGui::Begin("OpenGL_Test");
-                ImGui::SliderFloat3("Translation", &translate.x, -50.0f, 50.0f);
+                ImGui::SliderFloat3("Translation", &translate.x, -10.0f, 10.0f);
 				ImGui::SliderFloat3("Rotation", &rotate.x, -180.0f, 180.0f);
 				ImGui::SliderFloat("Scale", &scale, 0.0f, 1.0f);
 
@@ -196,6 +269,16 @@ int main(void)
 				ImGui::Text("Camera Rotation: (%.2f, %.2f, %.2f)", camera.getRot().x, camera.getRot().y, camera.getRot().z);
 				ImGui::Text("Camera Front: (%.2f, %.2f, %.2f)", camera.getFront().x, camera.getFront().y, camera.getFront().z);
 				ImGui::End();
+
+                ImGui::Begin("Model");
+                ImGui::Text("Model Path: %s", openModel->m_Directory.c_str());
+                if (ImGui::Button("Open")) {
+                    std::string selectedPath = OpenModelFileDialog();
+                    if (!selectedPath.empty())
+                        openModel = std::make_unique<Model>(selectedPath);
+                }
+				ImGui::End();
+
             }
 
             ImGui::Render();
